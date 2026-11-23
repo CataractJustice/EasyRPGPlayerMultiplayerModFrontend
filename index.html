@@ -47,6 +47,13 @@
 					<span id="user-info-name" class="user-info-name">—</span>
 					<span id="user-info-badge" class="user-info-badge"></span>
 				</div>
+
+				<div class="chat-visibility">
+					<label class="chat-visibility-label">
+						<input id="show-global-toggle" type="checkbox" checked>
+						<span>Show global</span>
+					</label>
+				</div>
 			</div>
 
 			<!-- Chat messages — visible to everyone -->
@@ -87,6 +94,15 @@
 			</div>
 
 			<form id="chat-form" class="chat-form" hidden>
+
+				<button
+					type="button"
+					id="chat-scope-toggle"
+					class="chat-scope-toggle"
+					aria-pressed="false"
+					title="Toggle between local and global chat">
+					[L]
+				</button>
 
 				<label for="chat-input" class="visually-hidden">
 					Enter a message
