@@ -12,6 +12,7 @@
 	<link rel="stylesheet" href="/styles/style.css">
 	<script src="/src/multiplayer.js" defer></script>
 	<script src="/src/settings.js" defer></script>
+	<script src="/src/callbacks.js" defer></script>
 </head>
 <body>
 
@@ -48,14 +49,21 @@
 				</div>
 			</div>
 
-			<!-- Username prompt — shown inside the chat until a name is chosen -->
-			<div id="username-prompt" class="username-prompt" role="form" aria-labelledby="username-prompt-title">
+			<!-- Chat messages — visible to everyone -->
+			<div
+				id="chat-messages"
+				class="chat-messages"
+				role="log"
+				aria-live="polite"
+				aria-label="Chat messages">
+			</div>
 
-				<p id="username-prompt-title" class="username-prompt-title">Join the chat</p>
+			<!-- Username prompt — shown in place of chat input until a name is chosen -->
+			<div id="username-prompt" class="username-prompt" role="form" aria-labelledby="username-prompt-title">
 
 				<form id="username-form" class="username-prompt-form" novalidate>
 
-					<label for="username-input" class="username-prompt-label">
+					<label for="username-input" class="visually-hidden">
 						Username
 					</label>
 
@@ -63,12 +71,10 @@
 						id="username-input"
 						class="username-prompt-input"
 						type="text"
-						placeholder="Your name..."
+						placeholder="Choose a username..."
 						autocomplete="off"
 						maxlength="32"
 						required>
-
-					<p id="username-error" class="username-prompt-error" role="alert" aria-live="assertive"></p>
 
 					<button type="submit" class="username-prompt-submit">
 						Join
@@ -76,19 +82,11 @@
 
 				</form>
 
+				<p id="username-error" class="username-prompt-error" role="alert" aria-live="assertive"></p>
+
 			</div>
 
-			<!-- Chat messages — hidden until a username is confirmed -->
-			<div
-				id="chat-messages"
-				class="chat-messages"
-				role="log"
-				aria-live="polite"
-				aria-label="Chat messages"
-				hidden>
-			</div>
-
-			<form id="chat-form" class="chat-form">
+			<form id="chat-form" class="chat-form" hidden>
 
 				<label for="chat-input" class="visually-hidden">
 					Enter a message

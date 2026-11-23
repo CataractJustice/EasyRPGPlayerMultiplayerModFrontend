@@ -181,20 +181,20 @@
 	}
 
 	/**
-	 * Show the inline username prompt and hide the message log.
+	 * Show the inline username prompt and keep chat form hidden.
 	 */
 	function showUsernamePrompt() {
 		usernamePrompt.removeAttribute("hidden");
-		chatMessages.setAttribute("hidden", "");
+		chatForm.setAttribute("hidden", "");
 		usernameInput.focus();
 	}
 
 	/**
-	 * Hide the inline username prompt and reveal the message log.
+	 * Hide the inline username prompt and reveal the chat form.
 	 */
 	function hideUsernamePrompt() {
 		usernamePrompt.setAttribute("hidden", "");
-		chatMessages.removeAttribute("hidden");
+		chatForm.removeAttribute("hidden");
 		usernameError.textContent = "";
 	}
 
@@ -211,12 +211,11 @@
 	 * - If authenticated, use the returned username and credentials.
 	 * - Otherwise, check for a saved guest username, then show the prompt.
 	 *
-	 * The game player is never blocked — only the chat send form is
-	 * disabled while waiting for a username.
+	 * The game player is never blocked and chat messages remain visible —
+	 * only sending messages requires choosing a username.
 	 */
 	function initAuth() {
-		// Disable the send form until a username is confirmed.
-		// The player iframe is unaffected.
+		// Keep the chat send form disabled/hidden until a username is confirmed.
 		chatInput.disabled = true;
 		chatForm.querySelector("button[type='submit']").disabled = true;
 
