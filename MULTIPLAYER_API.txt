@@ -1,0 +1,181 @@
+================================================================================
+  EasyRPG Multiplayer — Callback & Stub Reference
+  File: src/multiplayer.js
+================================================================================
+
+
+--------------------------------------------------------------------------------
+  STUB METHODS  (to be implemented)
+--------------------------------------------------------------------------------
+
+checkAuth()
+-----------
+  Location : src/multiplayer.js (private, called once on page load)
+  Returns  : Promise
+
+  Description:
+    Checks whether the current visitor is an authenticated user.
+    Currently NOT implemented — always resolves as unauthenticated.
+
+  Current behaviour:
+    return Promise.resolve({ authenticated: false });
+
+  When implemented, resolve with one of the following shapes:
+
+    Authenticated user:
+    {
+      authenticated : true,
+      username      : string,   // Display name of the authenticated user.
+      credentials   : any       // Session token, JWT, cookie value, etc.
+    }
+
+    Not authenticated:
+    {
+      authenticated : false
+    }
+
+  Side effects triggered by the resolved value:
+    - authenticated === true
+        * currentUsername is set to result.username
+        * Chat input and Send button are enabled
+        * onAuthResolvedCallback is called with the full result object
+
+    - authenticated === false
+        * The username modal is displayed so the visitor can pick a guest name
+        * onGuestUsernameCallback and onAuthResolvedCallback are called after
+          the guest form is submitted
+
+
+--------------------------------------------------------------------------------
+  CALLBACK REGISTRATION  (call these from your integration code)
+--------------------------------------------------------------------------------
+
+All registration methods are available on the global object:
+  window.EasyRPGMultiplayer
+
+
+1. setSendMessageCallback(callback)
+------------------------------------
+  Signature : callback(message: string, username: string) => void
+
+  Description:
+    Register the function that is called whenever the user submits the chat
+    form. Use this to forward the message to your server or game engine.
+
+    The chat UI does NOT display the message itself — your server is expected
+    to broadcast it back via receiveMessage() so it appears for all players.
+
+  Parameters passed to callback:
+    message   — Trimmed text the user typed (never empty).
+    username  — The current session username (guest or authenticated).
+
+  Example:
+    EasyRPGMultiplayer.setSendMessageCallback(function(message, username) {
+      socket.send(JSON.stringify({ type: "chat", author: username, message }));
+    });
+
+
+2. setOnAuthResolvedCallback(callback)
+---------------------------------------
+  Signature : callback(result: object) => void
+
+  Description:
+    Called once after authentication has fully resolved — either because
+    checkAuth() returned an authenticated user, or because the visitor
+    submitted the guest username form.
+
+    Use this to initialise your server connection or store the session info.
+
+  Result object shapes:
+
+    Authenticated:
+    {
+      authenticated : true,
+      username      : string,
+      credentials   : any
+    }
+
+    Guest:
+    {
+      authenticated : false,
+      username      : string
+    }
+
+  Example:
+    EasyRPGMultiplayer.setOnAuthResolvedCallback(function(result) {
+      console.log("User is ready:", result.username);
+      connectToServer(result);
+    });
+
+
+3. setOnGuestUsernameCallback(callback)
+----------------------------------------
+  Signature : callback(username: string) => void
+
+  Description:
+    Called specifically when the visitor submits the guest username form,
+    immediately before onAuthResolvedCallback. Use this for lightweight
+    validation, analytics, or any side effect that only applies to guest
+    users.
+
+    NOTE: This is NOT called for authenticated users.
+          Use setOnAuthResolvedCallback for a unified entry point.
+
+  Parameters passed to callback:
+    username  — The trimmed username string the visitor entered.
+
+  Example:
+    EasyRPGMultiplayer.setOnGuestUsernameCallback(function(username) {
+      analytics.track("guest_join", { username });
+    });
+
+
+--------------------------------------------------------------------------------
+  READ-ONLY HELPERS
+--------------------------------------------------------------------------------
+
+EasyRPGMultiplayer.getUsername()
+  Returns  : string | null
+  Description:
+    Returns the current session username, or null if the user has not yet
+    identified themselves (i.e. auth has not resolved yet).
+
+
+--------------------------------------------------------------------------------
+  EXISTING API  (unchanged)
+--------------------------------------------------------------------------------
+
+EasyRPGMultiplayer.setConnectionId(id)
+  Updates the "Connection ID" display in the chat header.
+  Pass null or "" to show "Not connected".
+
+EasyRPGMultiplayer.receiveMessage(data)
+  Appends a message to the chat log.
+  Expected shape: { author: string, message: string }
+
+EasyRPGMultiplayer.clearMessages()
+  Removes all messages from the chat log.
+
+
+--------------------------------------------------------------------------------
+  TYPICAL INTEGRATION ORDER
+--------------------------------------------------------------------------------
+
+  1. Register all callbacks BEFORE the page finishes loading, or at least
+     before DOMContentLoaded fires, so they are set before initAuth() runs.
+
+  2. initAuth() is called automatically at the bottom of multiplayer.js.
+     You do not call it yourself.
+
+  3. Recommended registration order:
+
+       EasyRPGMultiplayer.setOnAuthResolvedCallback(...)   // connect to server
+       EasyRPGMultiplayer.setOnGuestUsernameCallback(...)  // optional
+       EasyRPGMultiplayer.setSendMessageCallback(...)      // forward chat
+
+  4. When the server broadcasts a chat message, call:
+
+       EasyRPGMultiplayer.receiveMessage({ author: "...", message: "..." });
+
+
+================================================================================

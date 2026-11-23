@@ -1,0 +1,120 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<meta name="description" content="EasyRPG Multiplayer">
+
+	<title>EasyRPG Multiplayer</title>
+
+	<link rel="stylesheet" href="/styles/style.css">
+	<script src="/src/multiplayer.js" defer></script>
+</head>
+<body>
+
+	<header class="header">
+		<h1>EasyRPG Multiplayer</h1>
+	</header>
+
+	<main class="workspace">
+
+		<section class="player-container">
+			<iframe
+				id="Player"
+				title="EasyRPG Player"
+				width="640"
+				height="480"
+				src=""
+				allowfullscreen>
+			</iframe>
+		</section>
+
+		<aside class="chat-container">
+
+			<div class="chat-header">
+				<h2>Multiplayer Chat</h2>
+
+				<div class="connection-info">
+					Connection ID:
+					<span id="connection-id">Not connected</span>
+				</div>
+
+				<div class="user-info">
+					<span id="user-info-name" class="user-info-name">—</span>
+					<span id="user-info-badge" class="user-info-badge"></span>
+				</div>
+			</div>
+
+			<!-- Username prompt — shown inside the chat until a name is chosen -->
+			<div id="username-prompt" class="username-prompt" role="form" aria-labelledby="username-prompt-title">
+
+				<p id="username-prompt-title" class="username-prompt-title">Join the chat</p>
+
+				<form id="username-form" class="username-prompt-form" novalidate>
+
+					<label for="username-input" class="username-prompt-label">
+						Username
+					</label>
+
+					<input
+						id="username-input"
+						class="username-prompt-input"
+						type="text"
+						placeholder="Your name..."
+						autocomplete="off"
+						maxlength="32"
+						required>
+
+					<p id="username-error" class="username-prompt-error" role="alert" aria-live="assertive"></p>
+
+					<button type="submit" class="username-prompt-submit">
+						Join
+					</button>
+
+				</form>
+
+			</div>
+
+			<!-- Chat messages — hidden until a username is confirmed -->
+			<div
+				id="chat-messages"
+				class="chat-messages"
+				role="log"
+				aria-live="polite"
+				aria-label="Chat messages"
+				hidden>
+			</div>
+
+			<form id="chat-form" class="chat-form">
+
+				<label for="chat-input" class="visually-hidden">
+					Enter a message
+				</label>
+
+				<input
+					id="chat-input"
+					type="text"
+					placeholder="Enter message..."
+					autocomplete="off"
+					maxlength="500"
+					required>
+
+				<button type="submit">
+					Send
+				</button>
+
+			</form>
+
+		</aside>
+
+	</main>
+
+	<footer class="footer">
+		<span>EasyRPG Multiplayer</span>
+		<span>Powered by EasyRPG</span>
+	</footer>
+
+</body>
+</html>
