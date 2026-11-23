@@ -1,7 +1,7 @@
 
 
-EasyRPGMultiplayer.setSendMessageCallback(function(message, username) {
-	document.getElementById("Player").contentWindow.easyrpgPlayer.sendChatMessage(message, username);
+EasyRPGMultiplayer.setSendMessageCallback(function(message, username, isGlobal) {
+	document.getElementById("Player").contentWindow.easyrpgPlayer.sendChatMessage(message, username, !!isGlobal);
 });
 
 EasyRPGMultiplayer.setOnAuthResolvedCallback(function(result) {

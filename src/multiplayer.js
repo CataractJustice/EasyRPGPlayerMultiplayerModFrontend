@@ -1,4 +1,3 @@
-
 "use strict";
 
 let isConnected = false;
@@ -43,6 +42,8 @@ let isConnected = false;
 	const chatMessages = document.getElementById("chat-messages");
 	const chatForm = document.getElementById("chat-form");
 	const chatInput = document.getElementById("chat-input");
+	const chatScopeToggle = document.getElementById("chat-scope-toggle");
+	const showGlobalToggle = document.getElementById("show-global-toggle");
 	const connectionStatusElement = document.getElementById("connection-status");
 
 	/* ----------------------------------------
@@ -55,12 +56,32 @@ let isConnected = false;
 	const usernameError = document.getElementById("username-error");
 	const usernameSubmit = document.getElementById("username-submit");
 	usernameSubmit.disabled = true;
+
 	/* ----------------------------------------
 	   User info elements
 	   ---------------------------------------- */
 
 	const userInfoName = document.getElementById("user-info-name");
 	const userInfoBadge = document.getElementById("user-info-badge");
+
+	/* ----------------------------------------
+	   Chat scope state
+	   ---------------------------------------- */
+
+	/**
+	 * True when the user wants to send to the global (game-wide) chat.
+	 * False means local (same-map) chat.
+	 *
+	 * @type {boolean}
+	 */
+	let isGlobalChat = false;
+
+	/**
+	 * True when global messages should be shown in the chat log.
+	 *
+	 * @type {boolean}
+	 */
+	let showGlobalMessages = true;
 
 	/* ----------------------------------------
 	   Local storage
@@ -145,20 +166,6 @@ let isConnected = false;
 	 *
 	 * NOT YET IMPLEMENTED — always resolves as unauthenticated.
 	 *
-	 * When implemented, resolve with one of:
-	 *
-	 *   Authenticated:
-	 *   {
-	 *     authenticated: true,
-	 *     username:      string,  // Display name of the authenticated user.
-	 *     credentials:   any      // Session token, JWT, or similar.
-	 *   }
-	 *
-	 *   Not authenticated:
-	 *   {
-	 *     authenticated: false
-	 *   }
-	 *
 	 * @returns {Promise<{ authenticated: boolean, username?: string, credentials?: any }>}
 	 */
 	function checkAuth() {
@@ -211,11 +218,6 @@ let isConnected = false;
 
 	/**
 	 * Run authentication on startup.
-	 * - If authenticated, use the returned username and credentials.
-	 * - Otherwise, check for a saved guest username, then show the prompt.
-	 *
-	 * The game player is never blocked and chat messages remain visible —
-	 * only sending messages requires choosing a username.
 	 */
 	function initAuth() {
 		// Keep the chat send form disabled/hidden until a username is confirmed.
@@ -255,7 +257,7 @@ let isConnected = false;
 
 	usernameForm.addEventListener("submit", function (event) {
 		event.preventDefault();
-		if(isConnected == false) return;
+		if (isConnected === false) return;
 
 		const username = usernameInput.value.trim();
 
@@ -285,6 +287,67 @@ let isConnected = false;
 	});
 
 	/* ----------------------------------------
+	   Chat scope helpers
+	   ---------------------------------------- */
+
+	/**
+	 * Update the scope toggle button to reflect isGlobalChat.
+	 */
+	function updateChatScopeButton() {
+		if (!chatScopeToggle) return;
+
+		if (isGlobalChat) {
+			chatScopeToggle.textContent = "[G]";
+			chatScopeToggle.title = "Global chat (click to switch to local)";
+			chatScopeToggle.setAttribute("aria-pressed", "true");
+			chatScopeToggle.classList.add("chat-scope-toggle--global");
+			chatScopeToggle.classList.remove("chat-scope-toggle--local");
+		} else {
+			chatScopeToggle.textContent = "[L]";
+			chatScopeToggle.title = "Local chat (click to switch to global)";
+			chatScopeToggle.setAttribute("aria-pressed", "false");
+			chatScopeToggle.classList.add("chat-scope-toggle--local");
+			chatScopeToggle.classList.remove("chat-scope-toggle--global");
+		}
+	}
+
+	/**
+	 * Toggle the chat input between local and global scope.
+	 */
+	function toggleChatScope() {
+		isGlobalChat = !isGlobalChat;
+		updateChatScopeButton();
+	}
+
+	/**
+	 * Show or hide existing global messages based on showGlobalMessages.
+	 */
+	function refreshMessageVisibility() {
+		const messages = chatMessages.querySelectorAll(".chat-message");
+		for (let i = 0; i < messages.length; i++) {
+			const isGlobal = messages[i].dataset.global === "true";
+			if (isGlobal && !showGlobalMessages) {
+				messages[i].setAttribute("hidden", "");
+			} else {
+				messages[i].removeAttribute("hidden");
+			}
+		}
+	}
+
+	if (chatScopeToggle) {
+		updateChatScopeButton();
+		chatScopeToggle.addEventListener("click", toggleChatScope);
+	}
+
+	if (showGlobalToggle) {
+		showGlobalToggle.checked = showGlobalMessages;
+		showGlobalToggle.addEventListener("change", function () {
+			showGlobalMessages = showGlobalToggle.checked;
+			refreshMessageVisibility();
+		});
+	}
+
+	/* ----------------------------------------
 	   Multiplayer API
 	   ---------------------------------------- */
 
@@ -305,12 +368,17 @@ let isConnected = false;
 			isConnected = status;
 			usernameSubmit.disabled = !status;
 			chatInput.disabled = status;
+			if (!status && chatScopeToggle) {
+				chatScopeToggle.disabled = true;
+			} else if (chatScopeToggle) {
+				chatScopeToggle.disabled = false;
+			}
 		},
 
 		/**
 		 * Register the callback used when a user sends a message.
 		 *
-		 * The callback receives `(message, username)`.
+		 * The callback receives `(message, username, isGlobal)`.
 		 *
 		 * @param {Function} callback
 		 */
@@ -327,10 +395,6 @@ let isConnected = false;
 		/**
 		 * Register the callback invoked when authentication resolves.
 		 *
-		 * The callback receives:
-		 * - Authenticated: { authenticated: true,  username: string, credentials: any }
-		 * - Guest:         { authenticated: false, username: string }
-		 *
 		 * @param {Function} callback
 		 */
 		setOnAuthResolvedCallback: function (callback) {
@@ -345,8 +409,6 @@ let isConnected = false;
 
 		/**
 		 * Register the callback invoked when the user submits a guest username.
-		 *
-		 * The callback receives the chosen username string.
 		 *
 		 * @param {Function} callback
 		 */
@@ -379,12 +441,45 @@ let isConnected = false;
 		},
 
 		/**
+		 * Set the scope used for outgoing chat messages.
+		 *
+		 * @param {boolean} global
+		 */
+		setChatScope: function (global) {
+			isGlobalChat = !!global;
+			updateChatScopeButton();
+		},
+
+		/**
+		 * Returns true if the chat is currently set to global scope.
+		 *
+		 * @returns {boolean}
+		 */
+		isGlobalChatScope: function () {
+			return isGlobalChat;
+		},
+
+		/**
+		 * Toggle visibility of global chat messages.
+		 *
+		 * @param {boolean} show
+		 */
+		setShowGlobalMessages: function (show) {
+			showGlobalMessages = !!show;
+			if (showGlobalToggle) {
+				showGlobalToggle.checked = showGlobalMessages;
+			}
+			refreshMessageVisibility();
+		},
+
+		/**
 		 * Receive a message broadcast from the server.
 		 *
 		 * Expected format:
 		 * {
-		 *   author: "Player",
-		 *   message: "Hello!"
+		 *   author:  "Player",
+		 *   message: "Hello!",
+		 *   isGlobal: false   // optional, defaults to local
 		 * }
 		 *
 		 * @param {Object} data
@@ -394,22 +489,32 @@ let isConnected = false;
 				return;
 			}
 
+			const isGlobal = !!data.isGlobal;
 			const messageElement = document.createElement("div");
-			messageElement.className = "chat-message";
+			messageElement.className = "chat-message" +
+				(isGlobal ? " chat-message--global" : " chat-message--local");
+			messageElement.dataset.global = String(isGlobal);
+
+			const scopeElement = document.createElement("span");
+			scopeElement.className = "message-scope";
+			scopeElement.textContent = isGlobal ? "[G] " : "[L] ";
+			scopeElement.title = isGlobal ? "Global" : "Local";
 
 			const authorElement = document.createElement("span");
 			authorElement.className = "message-author";
-			authorElement.textContent =
-				(data.author || "Unknown") + ": ";
+			authorElement.textContent = (data.author || "Unknown") + ": ";
 
 			const textElement = document.createElement("span");
 			textElement.className = "message-text";
 			textElement.textContent = data.message;
 
+			messageElement.appendChild(scopeElement);
 			messageElement.appendChild(authorElement);
 			messageElement.appendChild(textElement);
 
 			chatMessages.appendChild(messageElement);
+
+			refreshMessageVisibility();
 
 			// Scroll to the newest server-broadcast message.
 			chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -450,9 +555,8 @@ let isConnected = false;
 			return;
 		}
 
-		// Only invoke the callback.
-		// Do NOT add the message to the chat here.
-		sendMessageCallback(message, currentUsername);
+		// Invoke the callback with the currently selected scope.
+		sendMessageCallback(message, currentUsername, isGlobalChat);
 
 		chatInput.value = "";
 		chatInput.focus();
