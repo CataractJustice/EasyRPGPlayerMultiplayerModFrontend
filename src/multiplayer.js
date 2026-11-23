@@ -32,7 +32,7 @@
 
 	const player = document.getElementById("Player");
 
-	player.src = `/easyrpg-player?game=${encodeURIComponent(game)}`;
+	player.src = `/easyrpg-player.html?game=${encodeURIComponent(game)}`;
 
 	/* ----------------------------------------
 	   Chat elements
