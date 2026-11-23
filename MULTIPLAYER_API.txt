@@ -145,9 +145,8 @@ EasyRPGMultiplayer.getUsername()
   EXISTING API  (unchanged)
 --------------------------------------------------------------------------------
 
-EasyRPGMultiplayer.setConnectionId(id)
-  Updates the "Connection ID" display in the chat header.
-  Pass null or "" to show "Not connected".
+EasyRPGMultiplayer.setConnection(id)
+  Updates the "Connection" display in the chat header.
 
 EasyRPGMultiplayer.receiveMessage(data)
   Appends a message to the chat log.

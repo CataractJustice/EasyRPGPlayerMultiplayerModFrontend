@@ -41,7 +41,7 @@
 	const chatMessages = document.getElementById("chat-messages");
 	const chatForm = document.getElementById("chat-form");
 	const chatInput = document.getElementById("chat-input");
-	const connectionIdElement = document.getElementById("connection-id");
+	const connectionStatusElement = document.getElementById("connection-status");
 
 	/* ----------------------------------------
 	   Username prompt elements
@@ -292,15 +292,12 @@
 	const MultiplayerAPI = {
 
 		/**
-		 * Update the displayed connection identifier.
+		 * Update the displayed connection status.
 		 *
-		 * @param {string} id
+		 * @param {string} status
 		 */
-		setConnectionId: function (id) {
-			connectionIdElement.textContent =
-				id == null || id === ""
-					? "Not connected"
-					: String(id);
+		setConnection: function (status) {
+			connectionStatusElement.textContent = status;
 		},
 
 		/**
