@@ -205,6 +205,11 @@ body {
 .username-prompt-label {
 	display: none;
 }
+.username-prompt-submit:disabled {
+	background: #2d4d60;
+	color: #666666;
+	cursor: not-allowed;
+}
 
 .username-prompt-input {
 	flex: 1;

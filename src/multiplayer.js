@@ -1,6 +1,8 @@
 
 "use strict";
 
+let isConnected = false;
+
 (function () {
 
 	/* ----------------------------------------
@@ -51,7 +53,8 @@
 	const usernameForm = document.getElementById("username-form");
 	const usernameInput = document.getElementById("username-input");
 	const usernameError = document.getElementById("username-error");
-
+	const usernameSubmit = document.getElementById("username-submit");
+	usernameSubmit.disabled = true;
 	/* ----------------------------------------
 	   User info elements
 	   ---------------------------------------- */
@@ -252,6 +255,7 @@
 
 	usernameForm.addEventListener("submit", function (event) {
 		event.preventDefault();
+		if(isConnected == false) return;
 
 		const username = usernameInput.value.trim();
 
@@ -294,10 +298,13 @@
 		/**
 		 * Update the displayed connection status.
 		 *
-		 * @param {string} status
+		 * @param {boolean} status
 		 */
 		setConnection: function (status) {
-			connectionStatusElement.textContent = status;
+			connectionStatusElement.textContent = status ? "Connected" : "Disconnected";
+			isConnected = status;
+			usernameSubmit.disabled = !status;
+			chatInput.disabled = status;
 		},
 
 		/**
