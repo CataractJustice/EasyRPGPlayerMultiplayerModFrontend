@@ -38,6 +38,18 @@
 
 		<aside class="chat-container">
 			<div class="chat-header">
+				<div class="options-list">
+					<div class="options-entry" onclick="openSaveFileManager(gameId)">
+					<span>manage savefiles</span>
+					</div>
+					<label class="chat-visibility-label">
+					<div class="options-entry">
+					<input id="show-global-toggle" type="checkbox" checked>
+					<span>global chat</span>
+					</div>
+					</label>
+				</div>
+				</div>
 				<div class="connection-info">
 					<div class="connection-info-entry">
 					<span>Connection:</span>
@@ -47,22 +59,11 @@
 					<span>Map id:</span>
 					<span id="map-id">none</span>
 					</div>
-
-					<div class="connection-info-entry" onclick="openSaveFileManager(gameId)">
-					<span>manage savefiles</span>
-					</div>
 				</div>
 
 				<div class="user-info">
 					<span id="user-info-name" class="user-info-name">—</span>
 					<span id="user-info-badge" class="user-info-badge"></span>
-				</div>
-
-				<div class="chat-visibility">
-					<label class="chat-visibility-label">
-						<input id="show-global-toggle" type="checkbox" checked>
-						<span>Show global</span>
-					</label>
 				</div>
 			</div>
 

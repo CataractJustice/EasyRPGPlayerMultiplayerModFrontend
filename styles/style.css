@@ -116,6 +116,24 @@ body {
 	font-size: 16px;
 }
 
+.options-list {
+	font-size: 12px;
+	color: #ffffff;
+	display: flex;
+	flex-flow: row;
+}
+
+.options-entry 
+{
+	border: solid 1px #606060;
+	padding: 3px;
+	background-color: #505050;
+	cursor: pointer;
+}
+.options-entry:hover 
+{
+	background-color: #294c67;
+}
 .connection-info {
 	margin: 4px 10px 0;
 	font-size: 12px;
