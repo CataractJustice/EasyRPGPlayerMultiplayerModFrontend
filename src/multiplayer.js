@@ -367,7 +367,7 @@ let isConnected = false;
 			connectionStatusElement.textContent = status ? "Connected" : "Disconnected";
 			isConnected = status;
 			usernameSubmit.disabled = !status;
-			chatInput.disabled = status;
+			chatInput.disabled = !status;
 			if (!status && chatScopeToggle) {
 				chatScopeToggle.disabled = true;
 			} else if (chatScopeToggle) {
