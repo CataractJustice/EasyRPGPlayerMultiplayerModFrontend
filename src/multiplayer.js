@@ -1,6 +1,7 @@
 "use strict";
 
 let isConnected = false;
+let gameId = "";
 
 (function () {
 
@@ -26,6 +27,7 @@ let isConnected = false;
 	}
 
 	const game = getGameName();
+	gameId = game;
 
 	/* ----------------------------------------
 	   Player initialization
@@ -45,6 +47,7 @@ let isConnected = false;
 	const chatScopeToggle = document.getElementById("chat-scope-toggle");
 	const showGlobalToggle = document.getElementById("show-global-toggle");
 	const connectionStatusElement = document.getElementById("connection-status");
+	const mapIdStatus = document.getElementById("map-id");
 
 	/* ----------------------------------------
 	   Username prompt elements
@@ -357,7 +360,14 @@ let isConnected = false;
 	};
 
 	const MultiplayerAPI = {
-
+		/**
+		 * Update the displayed map id
+		 * @param {string} id
+		 */
+		setMapIdStatus: function(id) 
+		{
+			mapIdStatus.innerText = id;
+		},
 		/**
 		 * Update the displayed connection status.
 		 *

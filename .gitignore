@@ -1,2 +1,6 @@
 games
 copysrc.sh
+serveLocal.js
+node_modules
+package-lock.json
+package.json

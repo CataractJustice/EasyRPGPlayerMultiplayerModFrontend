@@ -120,9 +120,11 @@ body {
 	margin: 4px 10px 0;
 	font-size: 12px;
 	color: #aaaaaa;
+	display: flex;
+	flex-flow: column;
 }
 
-#connection-status {
+#connection-status, #map-id {
 	color: #75c9ff;
 	overflow-wrap: anywhere;
 }
