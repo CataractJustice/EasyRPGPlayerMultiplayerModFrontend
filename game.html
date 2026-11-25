@@ -1,0 +1,279 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<meta name="description" content="EasyRPG Multiplayer">
+
+	<title>EasyRPG Multiplayer</title>
+
+	<link rel="stylesheet" href="/styles/systemvariables.css">
+	<link rel="stylesheet" href="/styles/style.css">
+	<link rel="stylesheet" href="/styles/savefileforms.css">
+	<script src="/src/multiplayer.js" defer></script>
+	<script src="/src/settings.js" defer></script>
+	<script src="/src/callbacks.js" defer></script>
+	<script src="/src/savefiles.js" defer></script>
+	<script src="/src/savefileforms.js" defer></script>
+	<script src="/src/loadXYZ.js" defer></script>
+	<script src="/src/systemstyles.js" defer></script>
+</head>
+<body>
+
+	<header class="header">
+		<h1>EasyRPG Multiplayer</h1>
+	</header>
+
+	<main class="workspace rgp-window">
+
+		<section class="player-container">
+			<iframe
+				id="Player"
+				title="EasyRPG Player"
+				width="640"
+				height="480"
+				src=""
+				class="rgp-window"
+				allowfullscreen>
+			</iframe>
+		</section>
+
+		<aside class="chat-container">
+			<div class="chat-header">
+				<div class="options-list">
+					<div class="options-entry" onclick="openSaveFileManager(gameId)">
+					<span>manage savefiles</span>
+					</div>
+					<div class="options-entry" onclick="window.location.href='/'">
+					<span>back to game picker</span>
+					</div>
+					<label class="chat-visibility-label">
+					<div class="options-entry">
+					<input id="show-global-toggle" type="checkbox" checked>
+					<span>global chat</span>
+					</div>
+					</label>
+
+					<label class="ownnametag-visibility-label">
+					<div class="options-entry">
+					<input id="show-ownnametag-toggle" type="checkbox" checked>
+					<span>own nametag</span>
+					</div>
+					</label>
+				</div>
+				</div>
+				<div class="connection-info">
+					<div class="connection-info-entry">
+					<span>Connection:</span>
+					<span id="connection-status">Not connected</span>
+					</div>
+					<div class="connection-info-entry">
+					<span>Map id:</span>
+					<span id="map-id">none</span>
+					</div>
+				</div>
+
+				<div class="user-info">
+					<span id="user-info-name" class="user-info-name">—</span>
+					<span id="user-info-badge" class="user-info-badge"></span>
+				</div>
+			</div>
+
+			<!-- Chat messages — visible to everyone -->
+			<div
+				id="chat-messages"
+				class="chat-messages"
+				role="log"
+				aria-live="polite"
+				aria-label="Chat messages">
+			</div>
+
+			<!-- Username prompt — shown in place of chat input until a name is chosen -->
+			<div id="username-prompt" class="username-prompt" role="form" aria-labelledby="username-prompt-title">
+
+				<form id="username-form" class="username-prompt-form" novalidate>
+
+					<label for="username-input" class="visually-hidden">
+						Username
+					</label>
+
+					<input
+						id="username-input"
+						class="username-prompt-input"
+						type="text"
+						placeholder="Choose a username..."
+						autocomplete="off"
+						maxlength="32"
+						required>
+
+					<button type="submit" id="username-submit" class="username-prompt-submit">
+						Join
+					</button>
+
+				</form>
+
+				<p id="username-error" class="username-prompt-error" role="alert" aria-live="assertive"></p>
+
+			</div>
+
+			<form id="chat-form" class="chat-form" hidden>
+
+				<button
+					type="button"
+					id="chat-scope-toggle"
+					class="chat-scope-toggle"
+					aria-pressed="false"
+					title="Toggle between local and global chat">
+					[L]
+				</button>
+
+				<label for="chat-input" class="visually-hidden">
+					Enter a message
+				</label>
+
+				<input
+					id="chat-input"
+					type="text"
+					placeholder="Enter message..."
+					autocomplete="off"
+					maxlength="500"
+					required>
+
+				<button type="submit">
+					Send
+				</button>
+
+			</form>
+
+		</aside>
+
+	</main>
+
+	<footer class="footer">
+		<span>EasyRPG Multiplayer</span>
+		<span>Powered by EasyRPG</span>
+	</footer>
+
+
+
+<!-- Save File Manager -->
+<dialog
+	id="saveFileDialog"
+	class="save-dialog"
+	aria-labelledby="saveFileDialogTitle"
+>
+	<div class="save-dialog__content">
+
+		<!-- Header -->
+		<header class="save-dialog__header">
+			<h2 id="saveFileDialogTitle">Save File Manager</h2>
+
+			<button
+				type="button"
+				class="save-dialog__close"
+				aria-label="Close"
+				onclick="closeSaveFileManager()"
+			>
+				&times;
+			</button>
+		</header>
+
+		<!-- Upload form -->
+		<form id="uploadSaveForm" class="save-form">
+
+			<h3>Upload save file</h3>
+
+			<label for="uploadSaveSlot">Save slot</label>
+
+			<select
+				id="uploadSaveSlot"
+				name="saveSlot"
+				class="save-slot-select"
+				required
+			>
+				<option value="">Select a save slot</option>
+				<option value="1">Slot 1</option>
+				<option value="2">Slot 2</option>
+				<option value="3">Slot 3</option>
+				<option value="4">Slot 4</option>
+				<option value="5">Slot 5</option>
+				<option value="6">Slot 6</option>
+				<option value="7">Slot 7</option>
+				<option value="8">Slot 8</option>
+				<option value="9">Slot 9</option>
+				<option value="10">Slot 10</option>
+			</select>
+
+			<label for="uploadSaveFile">Save file (.lsd)</label>
+
+			<input
+				type="file"
+				id="uploadSaveFile"
+				name="file"
+				class="save-file-input"
+				accept=".lsd"
+				required
+			/>
+
+			<button
+				type="submit"
+				class="save-button"
+			>
+				Upload save
+			</button>
+
+		</form>
+
+		<hr />
+
+		<!-- Download form -->
+		<form id="downloadSaveForm" class="save-form">
+
+			<h3>Download save file</h3>
+
+			<label for="downloadSaveSlot">Save slot</label>
+
+			<select
+				id="downloadSaveSlot"
+				name="saveSlot"
+				class="save-slot-select"
+				required
+			>
+				<option value="">Select a save slot</option>
+				<option value="1">Slot 1</option>
+				<option value="2">Slot 2</option>
+				<option value="3">Slot 3</option>
+				<option value="4">Slot 4</option>
+				<option value="5">Slot 5</option>
+				<option value="6">Slot 6</option>
+				<option value="7">Slot 7</option>
+				<option value="8">Slot 8</option>
+				<option value="9">Slot 9</option>
+				<option value="10">Slot 10</option>
+			</select>
+
+			<button
+				type="submit"
+				class="save-button"
+			>
+				Download save
+			</button>
+
+		</form>
+
+		<!-- Status messages -->
+		<p
+			id="saveFileStatus"
+			class="save-dialog__status"
+			role="status"
+			aria-live="polite"
+		></p>
+
+	</div>
+</dialog>
+
+
+</body>
+</html>
