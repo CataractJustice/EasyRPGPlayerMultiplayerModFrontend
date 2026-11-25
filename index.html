@@ -9,6 +9,7 @@
 
 	<title>EasyRPG Multiplayer</title>
 
+	<link rel="stylesheet" href="/styles/systemvariables.css">
 	<link rel="stylesheet" href="/styles/style.css">
 	<link rel="stylesheet" href="/styles/savefileforms.css">
 	<script src="/src/multiplayer.js" defer></script>
@@ -16,6 +17,8 @@
 	<script src="/src/callbacks.js" defer></script>
 	<script src="/src/savefiles.js" defer></script>
 	<script src="/src/savefileforms.js" defer></script>
+	<script src="/src/loadXYZ.js" defer></script>
+	<script src="/src/systemstyles.js" defer></script>
 </head>
 <body>
 
@@ -23,7 +26,7 @@
 		<h1>EasyRPG Multiplayer</h1>
 	</header>
 
-	<main class="workspace">
+	<main class="workspace rgp-window">
 
 		<section class="player-container">
 			<iframe
@@ -32,6 +35,7 @@
 				width="640"
 				height="480"
 				src=""
+				class="rgp-window"
 				allowfullscreen>
 			</iframe>
 		</section>

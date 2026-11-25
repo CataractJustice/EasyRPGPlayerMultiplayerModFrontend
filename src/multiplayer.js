@@ -1,7 +1,6 @@
-"use strict";
-
 let isConnected = false;
 let gameId = "";
+let gameIndexFile;
 
 (function () {
 
@@ -28,6 +27,11 @@ let gameId = "";
 
 	const game = getGameName();
 	gameId = game;
+
+	(async () => {
+		const response = await fetch(`/games/${gameId}/index.json`);
+		gameIndexFile = await response.json();
+	})();
 
 	/* ----------------------------------------
 	   Player initialization
