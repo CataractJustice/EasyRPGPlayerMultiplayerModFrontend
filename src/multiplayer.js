@@ -49,13 +49,19 @@ let gameIndexFile;
 	   Game data index
 	   ---------------------------------------- */
 
-	(async () => {
-		try {
-			const response = await fetch(`/games/${gameId}/index.json`);
-			gameIndexFile = await response.json();
-		} catch (e) {
-			console.warn("Could not load game index.json", e);
+	const gameIndexReady = (async () => {
+	try {
+		const response = await fetch(`/games/${gameId}/index.json`);
+
+		if (!response.ok) {
+			throw new Error(`HTTP ${response.status}`);
 		}
+
+		gameIndexFile = await response.json();
+	} catch (e) {
+		console.warn("Could not load game index.json", e);
+		throw e;
+	}
 	})();
 
 	/* ----------------------------------------
@@ -175,7 +181,7 @@ let gameIndexFile;
 	 *
 	 * Receives one object:
 	 * - Authenticated:   { authenticated: true,  username: string, credentials: any }
-	 * - Guest:           { authenticated: false, username: string }
+	 * - Guest:		   { authenticated: false, username: string }
 	 *
 	 * @type {Function}
 	 */
@@ -617,5 +623,260 @@ let gameIndexFile;
 	   ---------------------------------------- */
 
 	initAuth();
+
+
+
+/* ----------------------------------------
+   Character Sprite Picker
+   ---------------------------------------- */
+
+const spriteModal = document.getElementById("sprite-modal");
+const spriteGrid = document.getElementById("sprite-grid");
+const spritePage = document.getElementById("sprite-page");
+const spritePrev = document.getElementById("sprite-prev");
+const spriteNext = document.getElementById("sprite-next");
+const spriteClose = document.getElementById("sprite-close");
+const spriteRemove = document.getElementById("sprite-remove");
+
+const SPRITES_PER_PAGE = 24;
+
+let spritePageIndex = 0;
+let selectedSprite = null;
+let spriteAnimations = [];
+let spriteRenderId = 0;
+let spriteItems = [];
+
+// Stop every active animation and remove its canvas.
+function cleanupSpritePreviews() {
+	spriteRenderId++;
+
+	for (const animation of spriteAnimations) {
+		try {
+			animation.stop();
+			animation.canvas.remove();
+		} catch (e) {
+			console.warn("Sprite cleanup failed:", e);
+		}
+	}
+
+	spriteAnimations = [];
+	spriteGrid.replaceChildren();
+}
+
+function updateSpriteSelection() {
+	spriteGrid.querySelectorAll(".sprite-item").forEach(item => {
+		const selected =
+			selectedSprite &&
+			item.dataset.sheet === selectedSprite.sheet &&
+			Number(item.dataset.index) === selectedSprite.index;
+
+		item.classList.toggle("selected", !!selected);
+		item.setAttribute("aria-pressed", String(!!selected));
+	});
+}
+
+function updateSpritePagination() {
+	const totalPages = Math.max(
+		1,
+		Math.ceil(spriteItems.length / SPRITES_PER_PAGE)
+	);
+
+	spritePage.textContent =
+		`Page ${spritePageIndex + 1} / ${totalPages}`;
+
+	spritePrev.disabled = spritePageIndex === 0;
+	spriteNext.disabled = spritePageIndex >= totalPages - 1;
+}
+
+async function renderSpritePage() {
+	cleanupSpritePreviews();
+
+	const renderId = spriteRenderId;
+
+	const start = spritePageIndex * SPRITES_PER_PAGE;
+	const items = spriteItems.slice(
+		start,
+		start + SPRITES_PER_PAGE
+	);
+
+	updateSpritePagination();
+
+	if (!items.length) {
+		const empty = document.createElement("p");
+		empty.textContent = "No character sprites available.";
+		spriteGrid.appendChild(empty);
+		return;
+	}
+
+	for (const sprite of items) {
+		if (renderId !== spriteRenderId) return;
+
+		const { sheet, filename, index } = sprite;
+
+		const item = document.createElement("button");
+		item.type = "button";
+		item.className = "sprite-item";
+		item.dataset.sheet = sheet;
+		item.dataset.index = String(index);
+		item.setAttribute("aria-pressed", "false");
+
+		const label = document.createElement("span");
+		label.textContent = `${sheet} #${index}`;
+
+		item.appendChild(label);
+		spriteGrid.appendChild(item);
+
+		// Prevent duplicate callbacks and ignore already selected items.
+		item.addEventListener("click", () => {
+			if (
+				selectedSprite &&
+				selectedSprite.sheet === sheet &&
+				selectedSprite.index === index
+			) {
+				return;
+			}
+
+			selectedSprite = { sheet, index };
+
+			updateSpriteSelection();
+			document.getElementById("Player").contentWindow.easyrpgPlayer.setOwnSprite(sheet, index);
+		});
+
+		try {
+			const spriteFile =
+				`/games/${encodeURIComponent(gameId)}/CharSet/` +
+				filename.split("/").map(encodeURIComponent).join("/");
+
+			const result = await createAnimatedSprite(
+				spriteFile,
+				index,
+				item,
+				{}
+			);
+
+			// The page may have changed while the sprite was loading.
+			if (
+				renderId !== spriteRenderId ||
+				!item.isConnected
+			) {
+				result.stop();
+				result.canvas.remove();
+				continue;
+			}
+
+			spriteAnimations.push(result);
+
+			result.canvas.classList.add("sprite-preview");
+			result.canvas.setAttribute("aria-hidden", "true");
+
+			// Keep the label after the canvas.
+			item.insertBefore(result.canvas, label);
+
+		} catch (error) {
+			console.warn(
+				`Could not load sprite ${sheet} #${index}:`,
+				error
+			);
+
+			if (renderId === spriteRenderId) {
+				const errorLabel = document.createElement("small");
+				errorLabel.textContent = "Preview unavailable";
+				item.appendChild(errorLabel);
+			}
+		}
+	}
+
+	updateSpriteSelection();
+}
+
+async function openSpritePicker() {
+	spriteModal.hidden = false;
+
+	try {
+		await gameIndexReady;
+
+		const charset = gameIndexFile?.cache?.charset || {};
+
+		spriteItems = Object.entries(charset).flatMap(
+			([sheet, filename]) =>
+				Array.from({ length: 8 }, (_, index) => ({
+					sheet,
+					filename,
+					index
+				}))
+		);
+
+		// Keep the current page valid if the catalogue changes.
+		const totalPages = Math.max(
+			1,
+			Math.ceil(spriteItems.length / SPRITES_PER_PAGE)
+		);
+
+		spritePageIndex = Math.min(
+			spritePageIndex,
+			totalPages - 1
+		);
+
+		await renderSpritePage();
+
+	} catch (error) {
+		cleanupSpritePreviews();
+
+		const message = document.createElement("p");
+		message.textContent = "Unable to load character sprites.";
+		spriteGrid.appendChild(message);
+
+		console.error(error);
+	}
+}
+
+function closeSpritePicker() {
+	spriteModal.hidden = true;
+	cleanupSpritePreviews();
+}
+
+spritePrev.addEventListener("click", () => {
+	if (spritePageIndex > 0) {
+		spritePageIndex--;
+		renderSpritePage();
+	}
+});
+
+spriteNext.addEventListener("click", () => {
+	const totalPages = Math.ceil(
+		spriteItems.length / SPRITES_PER_PAGE
+	);
+
+	if (spritePageIndex < totalPages - 1) {
+		spritePageIndex++;
+		renderSpritePage();
+	}
+});
+
+spriteRemove.addEventListener("click", () => {
+	if (!selectedSprite) return;
+
+	selectedSprite = null;
+
+	updateSpriteSelection();
+	document.getElementById("Player").contentWindow.easyrpgPlayer.unsetOwnSprite();
+});
+
+spriteClose.addEventListener("click", closeSpritePicker);
+
+spriteModal.addEventListener("click", event => {
+	if (event.target === spriteModal) {
+		closeSpritePicker();
+	}
+});
+
+document.addEventListener("keydown", event => {
+	if (event.key === "Escape" && !spriteModal.hidden) {
+		closeSpritePicker();
+	}
+});
+
+// Expose the opener to the existing frontend.
+window.openSpritePicker = openSpritePicker;
 
 })();
