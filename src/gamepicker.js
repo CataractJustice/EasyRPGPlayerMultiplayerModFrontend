@@ -77,6 +77,16 @@
 	}
 
 	/**
+	 * Build the link URL for a game card.
+	 *
+	 * @param {string} gameId
+	 * @returns {string}
+	 */
+	function buildGameUrl(gameId) {
+		return "/" + encodeURIComponent(gameId) + "/";
+	}
+
+	/**
 	 * Fetch the list of available games from the static games folder.
 	 *
 	 * @returns {Promise<{id: string, title: string, description?: string}[]>}
@@ -128,7 +138,7 @@
 	function renderGameCard(game) {
 		const card = document.createElement("a");
 		card.className = "picker-card";
-		card.href = "/?game=" + encodeURIComponent(game.id);
+		card.href = buildGameUrl(game.id);
 		card.setAttribute("role", "listitem");
 
 		const title = document.createElement("h3");
