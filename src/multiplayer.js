@@ -48,6 +48,7 @@ let gameId = "";
 	const showGlobalToggle = document.getElementById("show-global-toggle");
 	const connectionStatusElement = document.getElementById("connection-status");
 	const mapIdStatus = document.getElementById("map-id");
+	const showOwnNametagToggle = document.getElementById("show-ownnametag-toggle");
 
 	/* ----------------------------------------
 	   Username prompt elements
@@ -347,6 +348,13 @@ let gameId = "";
 		showGlobalToggle.addEventListener("change", function () {
 			showGlobalMessages = showGlobalToggle.checked;
 			refreshMessageVisibility();
+		});
+	}
+
+	if(showOwnNametagToggle) 
+	{
+		showOwnNametagToggle.addEventListener("change", function() {
+			document.getElementById('Player').contentWindow.easyrpgPlayer.setShowOwnNametag(showOwnNametagToggle.checked);
 		});
 	}
 
