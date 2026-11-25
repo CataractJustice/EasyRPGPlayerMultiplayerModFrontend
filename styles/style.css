@@ -84,6 +84,10 @@ body {
 
 /* Chat */
 
+.chat-message[hidden] {
+    display: none !important;
+}
+
 .chat-container {
 	grid-column: 3;
 

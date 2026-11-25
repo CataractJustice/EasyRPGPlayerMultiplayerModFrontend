@@ -327,6 +327,7 @@ let gameId = "";
 	 * Show or hide existing global messages based on showGlobalMessages.
 	 */
 	function refreshMessageVisibility() {
+		console.log("A");
 		const messages = chatMessages.querySelectorAll(".chat-message");
 		for (let i = 0; i < messages.length; i++) {
 			const isGlobal = messages[i].dataset.global === "true";
