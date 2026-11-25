@@ -744,8 +744,7 @@ async function renderSpritePage() {
 
 		try {
 			const spriteFile =
-				`/games/${encodeURIComponent(gameId)}/CharSet/` +
-				filename.split("/").map(encodeURIComponent).join("/");
+				`/games/${encodeURIComponent(gameId)}/CharSet/${filename}`;
 
 			const result = await createAnimatedSprite(
 				spriteFile,
