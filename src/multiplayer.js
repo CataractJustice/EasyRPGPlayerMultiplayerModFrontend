@@ -8,6 +8,15 @@ let gameIndexFile;
 	   Game identification
 	   ---------------------------------------- */
 
+	/**
+	 * Detect the current game from the URL.
+	 *
+	 * Priority:
+	 *   1. The ?game= query parameter, for backward compatibility.
+	 *   2. The last path segment of a /game-name/ style URL.
+	 *
+	 * @returns {string}
+	 */
 	function getGameName() {
 		const params = new URLSearchParams(window.location.search);
 
@@ -28,9 +37,25 @@ let gameIndexFile;
 	const game = getGameName();
 	gameId = game;
 
+	/* ----------------------------------------
+	   Picker mode: no game selected
+	   ---------------------------------------- */
+
+	if (!game) {
+		return;
+	}
+
+	/* ----------------------------------------
+	   Game data index
+	   ---------------------------------------- */
+
 	(async () => {
-		const response = await fetch(`/games/${gameId}/index.json`);
-		gameIndexFile = await response.json();
+		try {
+			const response = await fetch(`/games/${gameId}/index.json`);
+			gameIndexFile = await response.json();
+		} catch (e) {
+			console.warn("Could not load game index.json", e);
+		}
 	})();
 
 	/* ----------------------------------------
@@ -39,7 +64,9 @@ let gameIndexFile;
 
 	const player = document.getElementById("Player");
 
-	player.src = `/easyrpg-player.html?game=${encodeURIComponent(game)}`;
+	if (player) {
+		player.src = `/easyrpg-player.html?game=${encodeURIComponent(game)}`;
+	}
 
 	/* ----------------------------------------
 	   Chat elements

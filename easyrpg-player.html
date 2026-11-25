@@ -373,7 +373,9 @@
             game: undefined,
             saveFs: undefined,
           });
-          easyrpgPlayer.initApi();
+          if (easyrpgPlayer.initApi) {
+            easyrpgPlayer.initApi();
+          }
           canvas.focus();
           document.getElementById("boot").classList.add("done");
         } catch (error) {
