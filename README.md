@@ -2,16 +2,21 @@
 
 This folder contains the web frontend for EasyRPG Multiplayer.
 
+It is intended to be served by the [hisui-gaming-server](https://github.com/hujle/hisui-gaming-server) backend, which handles HTTP routing, static assets, WebSocket multiplayer, and player counts.
+
 ## Important URL scheme
 
-Games are accessed with:
+When served by the backend, games have their own dedicated pages:
 
 ```
-https://example.com/?game=gamename
+https://example.com/                  -> Game selection page
+https://example.com/yumenikki/      -> Yume Nikki player page
+https://example.com/<game-name>/    -> Player page for that game
 ```
 
-When no `?game=` parameter is present, `index.html` shows the game picker.
-When `?game=` is present, it shows the game UI and loads the EasyRPG Player.
+The game selection page is `index.html`. It does **not** load or initialize the EasyRPG player.
+
+The player page is `game.html`. It initializes the player for the game discovered from the URL path (with `?game=` still supported as a fallback).
 
 ## Game folder layout
 
@@ -42,7 +47,7 @@ cd frontend
 node build-games-json.js
 ```
 
-This JSON file is read by `gamepicker.js` to render the picker cards.
+This JSON file is read by `gamepicker.js` to render the picker cards. The backend discovers available game routes from the same directory, so the generated list and backend routing stay in sync.
 
 ## Configuration
 
