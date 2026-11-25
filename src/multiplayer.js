@@ -28,9 +28,33 @@ let gameIndexFile;
 	const game = getGameName();
 	gameId = game;
 
+	const pickerMain = document.getElementById("picker-main");
+	const gameMain = document.getElementById("game-main");
+
+	/* ----------------------------------------
+	   Picker mode: no game selected
+	   ---------------------------------------- */
+
+	if (!game) {
+		if (pickerMain) pickerMain.removeAttribute("hidden");
+		if (gameMain) gameMain.setAttribute("hidden", "");
+		return;
+	}
+
+	/* ----------------------------------------
+	   Game mode: load the selected game
+	   ---------------------------------------- */
+
+	if (pickerMain) pickerMain.setAttribute("hidden", "");
+	if (gameMain) gameMain.removeAttribute("hidden");
+
 	(async () => {
-		const response = await fetch(`/games/${gameId}/index.json`);
-		gameIndexFile = await response.json();
+		try {
+			const response = await fetch(`/games/${gameId}/index.json`);
+			gameIndexFile = await response.json();
+		} catch (e) {
+			console.warn("Could not load game index.json", e);
+		}
 	})();
 
 	/* ----------------------------------------

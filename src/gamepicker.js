@@ -6,9 +6,18 @@
 	   DOM elements
 	   ---------------------------------------- */
 
+	const pickerMain = document.getElementById("picker-main");
 	const pickerList = document.getElementById("picker-list");
 	const totalPlayersElement = document.getElementById("total-players");
 	const errorElement = document.getElementById("picker-error");
+
+	/* ----------------------------------------
+	   Only run on the picker page
+	   ---------------------------------------- */
+
+	if (!pickerMain || !pickerList) {
+		return;
+	}
 
 	/* ----------------------------------------
 	   Configuration
@@ -22,16 +31,13 @@
 	const REFRESH_INTERVAL_MS = 10000;
 
 	/**
-	 * Static list of available games. Add your games here.
+	 * Fallback list of available games. Used when /games/games.json cannot be loaded.
 	 * Each entry needs a unique id and a display title.
 	 *
 	 * @type {{id: string, title: string, description?: string}[]}
 	 */
-	const GAMES = [
-		// Example entries; replace with your real games.
-		{ id: "yumenikki", title: "Yume Nikki" },
-		{ id: "ib", title: "Ib" },
-		{ id: "b2b", title: "B2B" }
+	const FALLBACK_GAMES = [
+		// Replace with your real games or generate /games/games.json.
 	];
 
 	/* ----------------------------------------
@@ -63,13 +69,43 @@
 	function buildApiUrl(game) {
 		const base = getApiBaseURL();
 		const query = game ? "?game=" + encodeURIComponent(game) : "";
-		return base + "/api/players" + query;
+		// Use a relative path when the configured base is empty/same-origin.
+		if (!base || base === "/") {
+			return "/api/players" + query;
+		}
+		return base.replace(/\/$/, "") + "/api/players" + query;
+	}
+
+	/**
+	 * Fetch the list of available games from the static games folder.
+	 *
+	 * @returns {Promise<{id: string, title: string, description?: string}[]>}
+	 */
+	async function fetchGameList() {
+		try {
+			const response = await fetch("/games/games.json", {
+				method: "GET",
+				headers: { Accept: "application/json" }
+			});
+			if (response.ok) {
+				const data = await response.json();
+				if (Array.isArray(data.games)) {
+					return data.games;
+				}
+				if (Array.isArray(data)) {
+					return data;
+				}
+			}
+		} catch (e) {
+			console.warn("Could not load /games/games.json, using fallback game list", e);
+		}
+		return FALLBACK_GAMES;
 	}
 
 	/**
 	 * Fetch player counts from the server.
 	 *
-	 * @returns {Promise<{total: number, games?: Record<string, number>, game?: string, count?: number}>}
+	 * @returns {Promise<{total: number, games?: Record<string, number>}>}
 	 */
 	async function fetchPlayerCounts() {
 		const response = await fetch(buildApiUrl(null), {
@@ -92,12 +128,12 @@
 	function renderGameCard(game) {
 		const card = document.createElement("a");
 		card.className = "picker-card";
-		card.href = "/game.html?game=" + encodeURIComponent(game.id);
+		card.href = "/?game=" + encodeURIComponent(game.id);
 		card.setAttribute("role", "listitem");
 
 		const title = document.createElement("h3");
 		title.className = "picker-card-title";
-		title.textContent = game.title;
+		title.textContent = game.title || game.id;
 
 		const count = document.createElement("div");
 		count.className = "picker-card-count";
@@ -123,6 +159,7 @@
 	 * @returns {string}
 	 */
 	function formatPlayerCount(count) {
+		if (typeof count !== "number") return "Players: —";
 		if (count === 0) return "No players online";
 		if (count === 1) return "1 player online";
 		return count + " players online";
@@ -132,16 +169,23 @@
 	 * Render the full list of games with current player counts.
 	 *
 	 * @param {{total: number, games?: Record<string, number>}} counts
+	 * @param {{id: string, title: string, description?: string}[]} games
 	 */
-	function render(counts) {
+	function render(counts, games) {
 		clearError();
 
-		totalPlayersElement.textContent = String(counts.total);
+		totalPlayersElement.textContent =
+			typeof counts.total === "number" ? String(counts.total) : "—";
 
 		pickerList.replaceChildren();
 
-		for (const game of GAMES) {
-			const count = counts.games && counts.games[game.id]
+		if (games.length === 0) {
+			showError("No games configured. Add games to /games/ and create /games/games.json.");
+			return;
+		}
+
+		for (const game of games) {
+			const count = counts.games && typeof counts.games[game.id] === "number"
 				? counts.games[game.id]
 				: 0;
 			pickerList.appendChild(renderGameCard({
@@ -154,12 +198,15 @@
 	}
 
 	/**
-	 * Load counts once and update the UI.
+	 * Load games and counts once and update the UI.
 	 */
 	async function refresh() {
 		try {
-			const counts = await fetchPlayerCounts();
-			render(counts);
+			const [games, counts] = await Promise.all([
+				fetchGameList(),
+				fetchPlayerCounts().catch(() => ({ total: 0, games: {} }))
+			]);
+			render(counts, games);
 		} catch (err) {
 			showError("Could not load player counts: " + err.message);
 		}
