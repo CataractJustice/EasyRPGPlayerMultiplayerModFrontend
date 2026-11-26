@@ -1,0 +1,109 @@
+
+.toggle-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-lg);
+
+    box-sizing: border-box;
+    padding: 9px var(--space-xl);
+
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-button);
+    border: 1px solid var(--color-border-button);
+    border-radius: var(--radius-md);
+
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-md);
+    line-height: 1.2;
+
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+
+    transition: var(--theme-transition);
+}
+
+.toggle-button:hover {
+    background-color: var(--color-bg-button-hover);
+}
+
+/* Hide native checkbox accessibly */
+.toggle-button input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+}
+
+/* Switch track */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    flex-shrink: 0;
+
+    width: 34px;
+    height: 18px;
+
+    background-color: var(--palette-gray-500);
+    border: 1px solid var(--palette-gray-300);
+    border-radius: 999px;
+
+    box-sizing: border-box;
+    transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+/* Switch thumb */
+.toggle-switch::before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+
+    width: 12px;
+    height: 12px;
+
+    background-color: var(--palette-bg-light);
+    border-radius: 50%;
+
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+
+    transition: transform 150ms ease;
+}
+
+/* Checked state */
+.toggle-button input:checked + .toggle-switch {
+    background-color: var(--color-accent-info);
+    border-color: var(--color-accent-info);
+}
+
+.toggle-button input:checked + .toggle-switch::before {
+    transform: translateX(16px);
+}
+
+/* Keyboard focus */
+.toggle-button input:focus-visible + .toggle-switch {
+    outline: 2px solid var(--color-border-accent);
+    outline-offset: 3px;
+}
+
+/* Disabled state */
+.toggle-button:has(input:disabled) {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.toggle-button:has(input:disabled) .toggle-switch {
+    cursor: not-allowed;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .toggle-button,
+    .toggle-switch,
+    .toggle-switch::before {
+        transition: none;
+    }
+}

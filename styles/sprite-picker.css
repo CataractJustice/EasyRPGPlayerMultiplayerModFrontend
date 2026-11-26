@@ -98,6 +98,13 @@ html.light .sprite-modal {
 	flex-wrap: wrap;
 }
 
+.sprite-footer-left 
+{
+	display: flex;
+	align-items: stretch;
+	gap: 10px;
+}
+
 .sprite-modal button {
 	padding: 9px var(--space-xl);
 	color: var(--color-text-primary);

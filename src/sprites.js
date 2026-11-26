@@ -116,16 +116,26 @@ export async function createAnimatedSprite(
         }
 
         draw();
-        animationId = requestAnimationFrame(animate);
+        if (options.animate !== false) {
+            animationId = requestAnimationFrame(animate);
+        } else {
+            draw();
+        }
     }
 
-    animationId = requestAnimationFrame(animate);
+    if (options.animate !== false) {
+        animationId = requestAnimationFrame(animate);
+    } else {
+        draw();
+    }
 
     return {
         canvas,
 
         stop() {
-            cancelAnimationFrame(animationId);
+            if (animationId !== undefined) {
+                cancelAnimationFrame(animationId);
+            }
         },
 
         setDirection(newDirection) {
@@ -153,6 +163,8 @@ export class SpritePickerController {
     #renderId = 0;
     #elements = {};
     #getPlayerFrame = null;
+    #animationEnabled = true;
+    #animationToggle = null;
 
     /**
      * @param {Object} elements - DOM element references.
@@ -185,6 +197,28 @@ export class SpritePickerController {
                 this.close();
             }
         });
+        this.#animationToggle = document.getElementById("sprite-animation-toggle");
+
+        if (this.#animationToggle) {
+            const savedPreference = localStorage.getItem("sprite-animation-enabled");
+        
+            this.#animationEnabled = savedPreference === null
+                ? true
+                : savedPreference === "true";
+        
+            this.#animationToggle.checked = this.#animationEnabled;
+        
+            this.#animationToggle.addEventListener("change", () => {
+                this.#animationEnabled = this.#animationToggle.checked;
+            
+                localStorage.setItem(
+                    "sprite-animation-enabled",
+                    String(this.#animationEnabled)
+                );
+            
+                this.#renderPage();
+            });
+        }
     }
 
     async open(gameId, gameIndexPromise) {
@@ -311,7 +345,14 @@ export class SpritePickerController {
 
             try {
                 const spriteFile = `/games/${encodeURIComponent(this.#gameId)}/CharSet/${filename}`;
-                const result = await createAnimatedSprite(spriteFile, index, item, {});
+                const result = await createAnimatedSprite(
+                    spriteFile,
+                    index,
+                    item,
+                    {
+                        animate: this.#animationEnabled
+                    }
+                );
 
                 if (renderId !== this.#renderId || !item.isConnected) {
                     result.stop();

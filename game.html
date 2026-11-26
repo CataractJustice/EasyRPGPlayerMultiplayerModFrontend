@@ -14,6 +14,7 @@
 	<link rel="stylesheet" href="/styles/save-dialog.css">
 	<link rel="stylesheet" href="/styles/sprite-picker.css">
 	<link rel="stylesheet" href="/styles/system.css">
+	<link rel="stylesheet" href="/styles/toggle-button.css">
 	<script>
 		// Compatibility shim: the EasyRPG player iframe calls
 		// window.parent.getServerURL() to discover the WebSocket URL.
@@ -268,29 +269,36 @@
 
 <!--SPRITE PICKER WINDOW-->
 <div id="sprite-modal" class="sprite-modal" hidden>
-  <div class="sprite-dialog" role="dialog"
-       aria-modal="true" aria-labelledby="sprite-title">
+	<div class="sprite-dialog" role="dialog"
+			 aria-modal="true" aria-labelledby="sprite-title">
 
-    <div class="sprite-header">
-      <h2 id="sprite-title">Choose Your Character</h2>
-      <button id="sprite-close" type="button"
-              aria-label="Close">&times;</button>
-    </div>
+		<div class="sprite-header">
+			<h2 id="sprite-title">Choose Your Character</h2>
+			<button id="sprite-close" type="button"
+							aria-label="Close">&times;</button>
+		</div>
 
-    <div id="sprite-grid" class="sprite-grid"></div>
+		<div id="sprite-grid" class="sprite-grid"></div>
 
-    <div class="sprite-footer">
-      <button id="sprite-remove" type="button">
-        Remove Selection
-      </button>
+		<div class="sprite-footer">
+			<div class="sprite-footer-left">
+				<button id="sprite-remove" type="button">
+					Remove Selection
+				</button>
+				<label class="toggle-button">
+    				<span>Animate</span>
+    				<input type="checkbox" id="sprite-animation-toggle" checked>
+    				<span class="toggle-switch"></span>
+				</label>
+			</div>
 
-      <div class="sprite-pagination">
-        <button id="sprite-prev" type="button">Previous</button>
-        <span id="sprite-page">Page 1 / 1</span>
-        <button id="sprite-next" type="button">Next</button>
-      </div>
-    </div>
-  </div>
+			<div class="sprite-pagination">
+				<button id="sprite-prev" type="button">Previous</button>
+				<span id="sprite-page">Page 1 / 1</span>
+				<button id="sprite-next" type="button">Next</button>
+			</div>
+		</div>
+	</div>
 </div>
 
 </body>
