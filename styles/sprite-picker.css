@@ -5,7 +5,11 @@
 	display: grid;
 	place-items: center;
 	padding: var(--space-3xl);
-	background: rgba(0, 0, 0, 0.8);
+	background: rgba(0, 0, 0, 0.7);
+}
+
+html.light .sprite-modal {
+	background: rgba(0, 0, 0, 0.45);
 }
 
 .sprite-modal[hidden] {
@@ -17,11 +21,11 @@
 	max-height: 90vh;
 	overflow-y: auto;
 	padding: var(--space-4xl);
-	border: 1px solid #343b4a;
-	border-radius: 14px;
-	background: #171b25;
+	border: 1px solid var(--color-border-default);
+	border-radius: var(--radius-xl);
+	background: var(--color-bg-panel);
 	color: var(--color-text-primary);
-	box-shadow: 0 15px 60px rgba(0, 0, 0, 0.6);
+	box-shadow: var(--shadow-dialog);
 }
 
 .sprite-header,
@@ -39,7 +43,7 @@
 
 .sprite-header h2 {
 	margin: 0;
-	font-size: 1.3rem;
+	font-size: var(--font-size-3xl);
 }
 
 .sprite-grid {
@@ -58,22 +62,23 @@
 	min-height: 115px;
 	padding: var(--space-xl);
 	color: var(--color-text-primary);
-	background: #222938;
-	border: 2px solid #394254;
-	border-radius: 9px;
+	background: var(--color-bg-input);
+	border: 2px solid var(--color-border-default);
+	border-radius: var(--radius-md);
 	cursor: pointer;
-	transition: border-color 0.15s, background 0.15s;
+	transition: border-color 0.15s, background 0.15s, transform 0.15s;
 }
 
 .sprite-item:hover {
-	background: #303b50;
-	border-color: #639dff;
+	background: var(--color-bg-panel-hover);
+	border-color: var(--color-border-accent);
+	transform: translateY(-2px);
 }
 
 .sprite-item.selected {
-	background: #233b60;
-	border-color: #4c9aff;
-	box-shadow: 0 0 0 2px rgba(76, 154, 255, 0.33);
+	background: var(--color-bg-panel-hover);
+	border-color: var(--color-border-accent);
+	box-shadow: 0 0 0 2px rgba(117, 201, 255, 0.33);
 }
 
 .sprite-item canvas {
@@ -96,14 +101,14 @@
 .sprite-modal button {
 	padding: 9px var(--space-xl);
 	color: var(--color-text-primary);
-	background: #303b50;
-	border: 1px solid #46536a;
-	border-radius: 7px;
+	background: var(--color-bg-button);
+	border: 1px solid var(--color-border-default);
+	border-radius: var(--radius-md);
 	cursor: pointer;
 }
 
 .sprite-modal button:hover:not(:disabled) {
-	background: #40577b;
+	background: var(--color-bg-button-hover);
 }
 
 .sprite-modal button:disabled {

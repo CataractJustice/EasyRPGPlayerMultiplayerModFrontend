@@ -1,32 +1,47 @@
 :root {
-	/* Background */
-	--color-bg-body: #181818;
-	--color-bg-panel: #252525;
-	--color-bg-panel-hover: #303030;
-	--color-bg-input: #202020;
+	/* Yumebooru-inspired palette tokens */
+	--palette-bg-dark: #0e0e0e;
+	--palette-bg-light: #ffffff;
+	--palette-text-dark: #f5f5f5;
+	--palette-text-light: #111111;
+	--palette-gray-100: #f0f0f0;
+	--palette-gray-300: #d1d1d1;
+	--palette-gray-500: #888888;
+	--palette-gray-700: #444444;
+	--palette-gray-900: #1a1a1a;
+	--palette-menu-dark: #1c1c1c;
+	--palette-menu-light: #eaeaea;
+	--palette-link-dark: #75c9ff;
+	--palette-link-light: #007acc;
+
+	/* Dark mode by default (mirrors Yumebooru) */
+	--color-bg-body: var(--palette-bg-dark);
+	--color-bg-panel: var(--palette-gray-900);
+	--color-bg-panel-hover: #252525;
+	--color-bg-input: #161616;
 	--color-bg-input-disabled: #2a2a2a;
-	--color-bg-header: #222222;
-	--color-bg-button: #3b6685;
-	--color-bg-button-hover: #497fa5;
-	--color-bg-button-active: #294c67;
-	--color-bg-button-disabled: #2d4d60;
+	--color-bg-header: var(--palette-menu-dark);
+	--color-bg-button: var(--palette-gray-700);
+	--color-bg-button-hover: #5a5a5a;
+	--color-bg-button-active: #333333;
+	--color-bg-button-disabled: #2d2d2d;
 
 	/* Borders */
-	--color-border-subtle: #383838;
-	--color-border-default: #444444;
-	--color-border-accent: #75c9ff;
-	--color-border-button: #606060;
+	--color-border-subtle: #2a2a2a;
+	--color-border-default: var(--palette-gray-700);
+	--color-border-accent: var(--palette-link-dark);
+	--color-border-button: var(--palette-gray-700);
 
 	/* Text */
-	--color-text-primary: #eeeeee;
-	--color-text-secondary: #cccccc;
-	--color-text-muted: #aaaaaa;
-	--color-text-dim: #888888;
+	--color-text-primary: var(--palette-text-dark);
+	--color-text-secondary: var(--palette-gray-300);
+	--color-text-muted: var(--palette-gray-500);
+	--color-text-dim: var(--palette-gray-700);
 	--color-text-danger: #ff7070;
-	--color-text-info: #75c9ff;
+	--color-text-info: var(--palette-link-dark);
 
 	/* Accents */
-	--color-accent-info: #75c9ff;
+	--color-accent-info: var(--palette-link-dark);
 	--color-accent-local: #a8d8ff;
 	--color-accent-global: #f0c4ff;
 
@@ -59,9 +74,10 @@
 	--player-height: 480px;
 	--form-height: 40px;
 	--button-width: 65px;
+	--header-height: 56px;
 
 	/* Typography */
-	--font-family-base: Arial, Helvetica, sans-serif;
+	--font-family-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 	--font-size-xs: 10px;
 	--font-size-sm: 11px;
 	--font-size-md: 12px;
@@ -76,10 +92,53 @@
 	--radius-sm: 3px;
 	--radius-md: 4px;
 	--radius-lg: 6px;
+	--radius-xl: 8px;
 	--shadow-dialog: 0 8px 30px rgba(0, 0, 0, 0.6);
+	--shadow-card: 0 2px 8px rgba(0, 0, 0, 0.5);
+	--shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.7);
+	--theme-transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 
 	/* System theme images, populated by JS */
 	--system-background-image: none;
 	--system-border-image: none;
 	--system-text-background-image: none;
+}
+
+html.light {
+	--color-bg-body: var(--palette-bg-light);
+	--color-bg-panel: var(--palette-gray-100);
+	--color-bg-panel-hover: #ffffff;
+	--color-bg-input: var(--palette-gray-100);
+	--color-bg-input-disabled: #e0e0e0;
+	--color-bg-header: var(--palette-menu-light);
+	--color-bg-button: var(--palette-gray-300);
+	--color-bg-button-hover: var(--palette-gray-500);
+	--color-bg-button-active: var(--palette-gray-700);
+	--color-bg-button-disabled: #e0e0e0;
+
+	--color-border-subtle: var(--palette-gray-300);
+	--color-border-default: var(--palette-gray-300);
+	--color-border-accent: var(--palette-link-light);
+	--color-border-button: var(--palette-gray-300);
+
+	--color-text-primary: var(--palette-text-light);
+	--color-text-secondary: #333333;
+	--color-text-muted: #666666;
+	--color-text-dim: var(--palette-gray-500);
+	--color-text-info: var(--palette-link-light);
+	--color-accent-info: var(--palette-link-light);
+
+	--color-badge-guest-bg: #fff8dc;
+	--color-badge-guest-text: #7a6a2a;
+	--color-badge-guest-border: #e3d69a;
+	--color-badge-auth-bg: #e6f4ea;
+	--color-badge-auth-text: #2e7d52;
+	--color-badge-auth-border: #b7dbc4;
+
+	--color-error-bg: #fff0f0;
+	--color-error-border: #ffcccc;
+
+	--shadow-card: 0 2px 8px rgba(0, 0, 0, 0.15);
+	--shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.2);
+	--shadow-dialog: 0 8px 30px rgba(0, 0, 0, 0.25);
 }
