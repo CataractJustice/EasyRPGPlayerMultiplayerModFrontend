@@ -17,7 +17,7 @@ export async function createAnimatedSprite(
     options = {}
 ) {
     const {
-        scale = 3,
+        scale = 1,
         frameDuration = 150,
         directionDuration = 1500,
         background = "transparent",
