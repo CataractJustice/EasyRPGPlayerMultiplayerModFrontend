@@ -82,7 +82,7 @@ html.light .sprite-modal {
 }
 
 .sprite-item canvas {
-	width: 64px;
+	width: 48px;
 	height: 64px;
 	image-rendering: pixelated;
 }
@@ -140,4 +140,145 @@ html.light .sprite-modal {
 	.sprite-pagination {
 		justify-content: space-between;
 	}
+}
+/* Category navigation */
+
+.sprite-categories {
+    display: flex;
+    gap: 10px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #333;
+}
+
+.sprite-categories button {
+    padding: 8px 16px;
+    border: 1px solid #444;
+    border-radius: 6px;
+    background: #222;
+    color: #ccc;
+    cursor: pointer;
+}
+
+.sprite-categories button.active {
+    background: #444;
+    color: white;
+    border-color: #777;
+}
+
+/* Sprite item */
+
+.sprite-item {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sprite-select {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 110px;
+    padding: 12px;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    background: #222;
+    color: white;
+    cursor: pointer;
+}
+
+.sprite-select:hover {
+    background: #333;
+}
+
+.sprite-select.selected {
+    border-color: #4da6ff;
+}
+
+.sprite-preview {
+    image-rendering: pixelated;
+}
+
+/* Favorite star */
+
+.sprite-favorite {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    z-index: 2;
+
+    width: 30px;
+    height: 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+
+    background: rgba(0, 0, 0, 0.65);
+    color: #aaa;
+
+    font-size: 23px;
+    line-height: 1;
+
+    cursor: pointer;
+
+    opacity: 0;
+    visibility: hidden;
+
+    transition:
+        opacity 0.15s ease,
+        color 0.15s ease,
+        transform 0.15s ease;
+}
+
+/* Show star on hover */
+
+.sprite-item:hover .sprite-favorite,
+.sprite-favorite:focus-visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Favorite state */
+
+.sprite-favorite.favorited {
+    color: #ffd700;
+    opacity: 1;
+    visibility: visible;
+}
+
+.sprite-favorite:hover {
+    transform: scale(1.2);
+    color: #ffdf40;
+}
+
+/* Always show favorites in the favorites category */
+.sprite-favorite.favorited {
+    color: #ffd700;
+}
+
+.sprite-select {
+    min-height: 120px;
+}
+
+.sprite-select::before {
+    content: "Loading...";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #888;
+    font-size: 11px;
+    pointer-events: none;
+}
+
+.sprite-select:has(.sprite-preview)::before {
+    display: none;
 }

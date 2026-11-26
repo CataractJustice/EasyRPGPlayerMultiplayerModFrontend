@@ -71,83 +71,115 @@ export async function createAnimatedSprite(
     container.appendChild(canvas);
 
     let direction = 0;
-    let frame = 0;
+let frame = 0;
 
-    let lastFrameTime = 0;
-    let lastDirectionTime = 0;
-    let animationId;
+let lastFrameTime = 0;
+let lastDirectionTime = 0;
+let animationId;
 
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+let animationEnabled = options.animate !== false;
+let stopped = false;
 
-        const sx = spriteX + frame * frameWidth;
-        const sy = spriteY + direction * frameHeight;
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        ctx.drawImage(
-            sheet,
-            sx,
-            sy,
-            frameWidth,
-            frameHeight,
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
+    const sx = spriteX + frame * frameWidth;
+    const sy = spriteY + direction * frameHeight;
+
+    ctx.drawImage(
+        sheet,
+        sx,
+        sy,
+        frameWidth,
+        frameHeight,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+}
+
+function animate(timestamp) {
+    if (stopped || !animationEnabled) return;
+
+    if (!lastFrameTime) {
+        lastFrameTime = timestamp;
+        lastDirectionTime = timestamp;
     }
 
-    function animate(timestamp) {
-        if (!lastFrameTime) {
-            lastFrameTime = timestamp;
-            lastDirectionTime = timestamp;
-        }
+    if (timestamp - lastFrameTime >= frameDuration) {
+        frame = (frame + 1) % 3;
+        lastFrameTime = timestamp;
+    }
 
-        if (timestamp - lastFrameTime >= frameDuration) {
-            frame = (frame + 1) % 3;
-            lastFrameTime = timestamp;
-        }
+    if (
+        autoSpin &&
+        timestamp - lastDirectionTime >= directionDuration
+    ) {
+        direction = (direction + 1) % 4;
+        lastDirectionTime = timestamp;
+    }
 
-        if (
-            autoSpin &&
-            timestamp - lastDirectionTime >= directionDuration
-        ) {
-            direction = (direction + 1) % 4;
-            lastDirectionTime = timestamp;
-        }
+    draw();
 
-        draw();
-        if (options.animate !== false) {
-            animationId = requestAnimationFrame(animate);
+    animationId = requestAnimationFrame(animate);
+}
+
+function startAnimation() {
+    if (stopped || animationEnabled === false) return;
+
+    if (animationId !== undefined) return;
+
+    lastFrameTime = 0;
+    lastDirectionTime = 0;
+
+    animationId = requestAnimationFrame(timestamp => {
+        animationId = undefined;
+        animate(timestamp);
+    });
+}
+
+function stopAnimation() {
+    if (animationId !== undefined) {
+        cancelAnimationFrame(animationId);
+        animationId = undefined;
+    }
+}
+
+draw();
+
+if (animationEnabled) {
+    startAnimation();
+}
+
+return {
+    canvas,
+
+    stop() {
+        stopped = true;
+        stopAnimation();
+    },
+
+    setAnimationEnabled(enabled) {
+        animationEnabled = enabled;
+
+        if (enabled) {
+            startAnimation();
         } else {
-            draw();
+            stopAnimation();
         }
-    }
+    },
 
-    if (options.animate !== false) {
-        animationId = requestAnimationFrame(animate);
-    } else {
+    setDirection(newDirection) {
+        direction = ((newDirection % 4) + 4) % 4;
+        draw();
+    },
+
+    setFrame(newFrame) {
+        frame = ((newFrame % 3) + 3) % 3;
         draw();
     }
-
-    return {
-        canvas,
-
-        stop() {
-            if (animationId !== undefined) {
-                cancelAnimationFrame(animationId);
-            }
-        },
-
-        setDirection(newDirection) {
-            direction = ((newDirection % 4) + 4) % 4;
-            draw();
-        },
-
-        setFrame(newFrame) {
-            frame = ((newFrame % 3) + 3) % 3;
-            draw();
-        }
-    };
+};
 }
 
 /**
@@ -165,6 +197,8 @@ export class SpritePickerController {
     #getPlayerFrame = null;
     #animationEnabled = true;
     #animationToggle = null;
+    #category = "all";
+    #favorites = new Set();
 
     /**
      * @param {Object} elements - DOM element references.
@@ -185,6 +219,19 @@ export class SpritePickerController {
         this.#elements.next.addEventListener("click", () => this.#nextPage());
         this.#elements.close.addEventListener("click", () => this.close());
         this.#elements.remove.addEventListener("click", () => this.#removeSelection());
+
+        this.#elements.categoryAll = document.getElementById("sprite-category-all");
+
+        this.#elements.categoryFavorites =
+            document.getElementById("sprite-category-favorites");
+
+        this.#elements.categoryAll.addEventListener("click", () => {
+            this.#setCategory("all");
+        });
+
+        this.#elements.categoryFavorites.addEventListener("click", () => {
+            this.#setCategory("favorites");
+        });
 
         this.#elements.modal.addEventListener("click", (event) => {
             if (event.target === this.#elements.modal) {
@@ -209,20 +256,26 @@ export class SpritePickerController {
             this.#animationToggle.checked = this.#animationEnabled;
         
             this.#animationToggle.addEventListener("change", () => {
-                this.#animationEnabled = this.#animationToggle.checked;
-            
-                localStorage.setItem(
-                    "sprite-animation-enabled",
-                    String(this.#animationEnabled)
-                );
-            
-                this.#renderPage();
-            });
+    this.#animationEnabled = this.#animationToggle.checked;
+
+    localStorage.setItem(
+        "sprite-animation-enabled",
+        String(this.#animationEnabled)
+    );
+
+    // Update existing animations instead of re-rendering sprites.
+    for (const animation of this.#animations) {
+        animation.setAnimationEnabled(this.#animationEnabled);
+    }
+});
         }
     }
 
     async open(gameId, gameIndexPromise) {
         this.#gameId = gameId;
+
+        this.#loadFavorites();
+
         this.#elements.modal.hidden = false;
 
         try {
@@ -281,103 +334,223 @@ export class SpritePickerController {
                 item.dataset.sheet === this.#selected.sheet &&
                 Number(item.dataset.index) === this.#selected.index;
 
-            item.classList.toggle("selected", !!selected);
-            item.setAttribute("aria-pressed", String(!!selected));
+            const button = item.querySelector(".sprite-select");
+
+            button?.classList.toggle("selected", !!selected);
+
+            button?.setAttribute(
+                "aria-pressed",
+                String(!!selected)
+            );
         });
     }
 
-    #updatePagination() {
-        const totalPages = Math.max(1, Math.ceil(this.#items.length / SPRITES_PER_PAGE));
-        this.#elements.page.textContent = `Page ${this.#pageIndex + 1} / ${totalPages}`;
+    #updatePagination() 
+    {
+        const items = this.#getVisibleItems();
+
+        const totalPages = Math.max(
+            1,
+            Math.ceil(items.length / SPRITES_PER_PAGE)
+        );
+
+        this.#pageIndex = Math.min(
+            this.#pageIndex,
+            totalPages - 1
+        );
+
+        this.#elements.page.textContent =
+            `Page ${this.#pageIndex + 1} / ${totalPages}`;
+
         this.#elements.prev.disabled = this.#pageIndex === 0;
-        this.#elements.next.disabled = this.#pageIndex >= totalPages - 1;
+
+        this.#elements.next.disabled =
+            this.#pageIndex >= totalPages - 1;
+    }
+    async #renderPage() {
+    this.#cleanup();
+
+    const renderId = this.#renderId;
+
+    const visibleItems = this.#getVisibleItems();
+
+    const totalPages = Math.max(
+        1,
+        Math.ceil(visibleItems.length / SPRITES_PER_PAGE)
+    );
+
+    this.#pageIndex = Math.min(
+        this.#pageIndex,
+        totalPages - 1
+    );
+
+    const start = this.#pageIndex * SPRITES_PER_PAGE;
+
+    const items = visibleItems.slice(
+        start,
+        start + SPRITES_PER_PAGE
+    );
+
+    this.#updatePagination();
+
+    if (!items.length) {
+        const empty = document.createElement("p");
+
+        empty.textContent =
+            this.#category === "favorites"
+                ? "No favorite sprites yet."
+                : "No character sprites available.";
+
+        this.#elements.grid.appendChild(empty);
+        return;
     }
 
-    async #renderPage() {
-        this.#cleanup();
+    // Store references to boxes and their sprite information.
+    const spriteElements = [];
 
-        const renderId = this.#renderId;
-        const start = this.#pageIndex * SPRITES_PER_PAGE;
-        const items = this.#items.slice(start, start + SPRITES_PER_PAGE);
+    // =====================================
+    // PHASE 1: CREATE ALL SPRITE BOXES
+    // =====================================
 
-        this.#updatePagination();
+    for (const sprite of items) {
+        const { sheet, filename, index } = sprite;
 
-        if (!items.length) {
-            const empty = document.createElement("p");
-            empty.textContent = "No character sprites available.";
-            this.#elements.grid.appendChild(empty);
-            return;
-        }
+        const item = document.createElement("div");
 
-        for (const sprite of items) {
-            if (renderId !== this.#renderId) return;
+        item.className = "sprite-item";
+        item.dataset.sheet = sheet;
+        item.dataset.index = String(index);
 
-            const { sheet, filename, index } = sprite;
+        const selectButton = document.createElement("button");
 
-            const item = document.createElement("button");
-            item.type = "button";
-            item.className = "sprite-item";
-            item.dataset.sheet = sheet;
-            item.dataset.index = String(index);
-            item.setAttribute("aria-pressed", "false");
+        selectButton.type = "button";
+        selectButton.className = "sprite-select";
+        selectButton.setAttribute("aria-pressed", "false");
 
-            const label = document.createElement("span");
-            label.textContent = `${sheet} #${index}`;
+        const label = document.createElement("span");
 
-            item.appendChild(label);
-            this.#elements.grid.appendChild(item);
+        label.className = "sprite-label";
+        label.textContent = `${sheet} #${index}`;
 
-            item.addEventListener("click", () => {
-                if (
-                    this.#selected &&
-                    this.#selected.sheet === sheet &&
-                    this.#selected.index === index
-                ) {
-                    return;
+        const star = document.createElement("button");
+
+        const favorite = this.#isFavorite(sheet, index);
+
+        star.type = "button";
+        star.className = "sprite-favorite";
+        star.textContent = favorite ? "★" : "☆";
+
+        star.classList.toggle("favorited", favorite);
+
+        star.setAttribute(
+            "aria-label",
+            favorite ? "Remove from favorites" : "Add to favorites"
+        );
+
+        star.setAttribute("aria-pressed", String(favorite));
+
+        star.addEventListener("click", event => {
+            event.stopPropagation();
+
+            this.#toggleFavorite(sheet, index, star);
+        });
+
+        selectButton.addEventListener("click", () => {
+            if (
+                this.#selected &&
+                this.#selected.sheet === sheet &&
+                this.#selected.index === index
+            ) {
+                return;
+            }
+
+            this.#selected = { sheet, index };
+
+            this.#updateSelection();
+
+            const player = this.#getPlayerFrame();
+
+            player?.contentWindow?.easyrpgPlayer
+                ?.setOwnSprite?.(sheet, index);
+        });
+
+        selectButton.appendChild(label);
+
+        item.appendChild(selectButton);
+        item.appendChild(star);
+
+        // Append every box immediately.
+        this.#elements.grid.appendChild(item);
+
+        spriteElements.push({
+            item,
+            selectButton,
+            sprite
+        });
+    }
+
+    // =====================================
+    // PHASE 2: LOAD SPRITES
+    // =====================================
+
+    const loadSprite = async ({ item, selectButton, sprite }) => {
+        if (renderId !== this.#renderId) return;
+
+        const { sheet, filename, index } = sprite;
+
+        try {
+            const spriteFile =
+                `/games/${encodeURIComponent(this.#gameId)}/CharSet/${filename}`;
+
+            const result = await createAnimatedSprite(
+                spriteFile,
+                index,
+                selectButton,
+                {
+                    animate: this.#animationEnabled
                 }
+            );
 
-                this.#selected = { sheet, index };
-                this.#updateSelection();
+            // Prevent stale asynchronous results.
+            if (renderId !== this.#renderId || !item.isConnected) {
+                result.stop();
+                result.canvas.remove();
+                return;
+            }
 
-                const player = this.#getPlayerFrame();
-                player?.contentWindow?.easyrpgPlayer?.setOwnSprite?.(sheet, index);
-            });
+            this.#animations.push(result);
 
-            try {
-                const spriteFile = `/games/${encodeURIComponent(this.#gameId)}/CharSet/${filename}`;
-                const result = await createAnimatedSprite(
-                    spriteFile,
-                    index,
-                    item,
-                    {
-                        animate: this.#animationEnabled
-                    }
-                );
+            result.canvas.classList.add("sprite-preview");
+            result.canvas.setAttribute("aria-hidden", "true");
 
-                if (renderId !== this.#renderId || !item.isConnected) {
-                    result.stop();
-                    result.canvas.remove();
-                    continue;
-                }
+            selectButton.insertBefore(
+                result.canvas,
+                selectButton.firstChild
+            );
 
-                this.#animations.push(result);
+        } catch (error) {
+            console.warn(
+                `Could not load sprite ${sheet} #${index}:`,
+                error
+            );
 
-                result.canvas.classList.add("sprite-preview");
-                result.canvas.setAttribute("aria-hidden", "true");
-                item.insertBefore(result.canvas, label);
-            } catch (error) {
-                console.warn(`Could not load sprite ${sheet} #${index}:`, error);
+            if (renderId === this.#renderId && item.isConnected) {
+                const errorLabel = document.createElement("small");
 
-                if (renderId === this.#renderId) {
-                    const errorLabel = document.createElement("small");
-                    errorLabel.textContent = "Preview unavailable";
-                    item.appendChild(errorLabel);
-                }
+                errorLabel.textContent = "Preview unavailable";
+
+                selectButton.appendChild(errorLabel);
             }
         }
+    };
 
-        this.#updateSelection();
-    }
+    // Load all sprites concurrently, after all boxes exist.
+    await Promise.all(spriteElements.map(loadSprite));
+
+    if (renderId !== this.#renderId) return;
+
+    this.#updateSelection();
+}
 
     #prevPage() {
         if (this.#pageIndex > 0) {
@@ -387,7 +560,10 @@ export class SpritePickerController {
     }
 
     #nextPage() {
-        const totalPages = Math.ceil(this.#items.length / SPRITES_PER_PAGE);
+        const totalPages = Math.ceil(
+            this.#getVisibleItems().length / SPRITES_PER_PAGE
+        );
+
         if (this.#pageIndex < totalPages - 1) {
             this.#pageIndex++;
             this.#renderPage();
@@ -402,5 +578,125 @@ export class SpritePickerController {
 
         const player = this.#getPlayerFrame();
         player?.contentWindow?.easyrpgPlayer?.unsetOwnSprite?.();
+    }
+
+    #getFavoritesKey() {
+        return `sprite-favorites:${this.#gameId}`;
+    }
+
+    #loadFavorites() {
+        try {
+            const saved = JSON.parse(
+                localStorage.getItem(this.#getFavoritesKey()) || "[]"
+            );
+
+            this.#favorites = new Set(
+                saved.map(sprite => `${sprite.sheet}:${sprite.index}`)
+            );
+        } catch {
+            this.#favorites = new Set();
+        }
+    }
+
+    #saveFavorites() {
+        localStorage.setItem(
+            this.#getFavoritesKey(),
+            JSON.stringify(
+                [...this.#favorites].map(key => {
+                    const separator = key.lastIndexOf(":");
+
+                    return {
+                        sheet: key.substring(0, separator),
+                        index: Number(key.substring(separator + 1))
+                    };
+                })
+            )
+        );
+    }
+
+    #isFavorite(sheet, index) {
+        return this.#favorites.has(`${sheet}:${index}`);
+    }
+
+    #toggleFavorite(sheet, index, star) {
+    const key = `${sheet}:${index}`;
+
+    if (this.#favorites.has(key)) {
+        this.#favorites.delete(key);
+    } else {
+        this.#favorites.add(key);
+    }
+
+    this.#saveFavorites();
+
+    const isFavorite = this.#favorites.has(key);
+
+    // Update only the clicked star.
+    star.textContent = isFavorite ? "★" : "☆";
+    star.classList.toggle("favorited", isFavorite);
+
+    star.setAttribute(
+        "aria-label",
+        isFavorite
+            ? "Remove from favorites"
+            : "Add to favorites"
+    );
+
+    star.setAttribute("aria-pressed", String(isFavorite));
+
+    // If we're viewing Favorites and the sprite was unfavorited,
+    // remove only that sprite from the grid.
+    if (this.#category === "favorites" && !isFavorite) {
+        const item = star.closest(".sprite-item");
+
+        const animation = this.#animations.find(
+            animation => item?.contains(animation.canvas)
+        );
+
+        if (animation) {
+            animation.stop();
+            animation.canvas.remove();
+
+            this.#animations = this.#animations.filter(
+                current => current !== animation
+            );
+        }
+
+        item?.remove();
+
+        this.#updatePagination();
+
+        // Show empty message if necessary.
+        if (!this.#elements.grid.querySelector(".sprite-item")) {
+            const empty = document.createElement("p");
+            empty.textContent = "No favorite sprites yet.";
+            this.#elements.grid.appendChild(empty);
+        }
+    }
+}
+
+    #getVisibleItems() {
+        if (this.#category === "favorites") {
+            return this.#items.filter(sprite =>
+                this.#isFavorite(sprite.sheet, sprite.index)
+            );
+        }
+
+        return this.#items;
+    }
+
+    #setCategory(category) {
+        this.#category = category;
+        this.#pageIndex = 0;
+
+        this.#elements.categoryAll.classList.toggle(
+            "active", category === "all"
+        );
+
+        this.#elements.categoryFavorites.classList.toggle(
+            "active", category === "favorites"
+        );
+
+        this.#renderPage();
     }
 }

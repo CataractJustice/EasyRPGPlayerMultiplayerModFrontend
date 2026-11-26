@@ -9,7 +9,7 @@ export const STORAGE_KEY_GUEST_USERNAME = "easyrpg_guest_username";
 
 export const PLAYER_COUNT_REFRESH_MS = 10_000;
 
-export const SPRITES_PER_PAGE = 24;
+export const SPRITES_PER_PAGE = 16;
 
 /**
  * Return the WebSocket URL used by the EasyRPG multiplayer client.

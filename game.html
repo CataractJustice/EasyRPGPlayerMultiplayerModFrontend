@@ -269,36 +269,49 @@
 
 <!--SPRITE PICKER WINDOW-->
 <div id="sprite-modal" class="sprite-modal" hidden>
-	<div class="sprite-dialog" role="dialog"
-			 aria-modal="true" aria-labelledby="sprite-title">
+    <div class="sprite-dialog" role="dialog"
+         aria-modal="true" aria-labelledby="sprite-title">
 
-		<div class="sprite-header">
-			<h2 id="sprite-title">Choose Your Character</h2>
-			<button id="sprite-close" type="button"
-							aria-label="Close">&times;</button>
-		</div>
+        <div class="sprite-header">
+            <h2 id="sprite-title">Choose Your Character</h2>
+            <button id="sprite-close" type="button"
+                    aria-label="Close">&times;</button>
+        </div>
 
-		<div id="sprite-grid" class="sprite-grid"></div>
+        <div class="sprite-categories">
+            <button id="sprite-category-all"
+                    class="active" type="button">
+                All Sprites
+            </button>
 
-		<div class="sprite-footer">
-			<div class="sprite-footer-left">
-				<button id="sprite-remove" type="button">
-					Remove Selection
-				</button>
-				<label class="toggle-button">
-    				<span>Animate</span>
-    				<input type="checkbox" id="sprite-animation-toggle" checked>
-    				<span class="toggle-switch"></span>
-				</label>
-			</div>
+            <button id="sprite-category-favorites" type="button">
+                ★ Favorites
+            </button>
+        </div>
 
-			<div class="sprite-pagination">
-				<button id="sprite-prev" type="button">Previous</button>
-				<span id="sprite-page">Page 1 / 1</span>
-				<button id="sprite-next" type="button">Next</button>
-			</div>
-		</div>
-	</div>
+        <div id="sprite-grid" class="sprite-grid"></div>
+
+        <div class="sprite-footer">
+            <div class="sprite-footer-left">
+                <button id="sprite-remove" type="button">
+                    Remove Selection
+                </button>
+
+                <label class="toggle-button">
+                    <span>Animate</span>
+                    <input type="checkbox"
+                           id="sprite-animation-toggle" checked>
+                    <span class="toggle-switch"></span>
+                </label>
+            </div>
+
+            <div class="sprite-pagination">
+                <button id="sprite-prev" type="button">Previous</button>
+                <span id="sprite-page">Page 1 / 1</span>
+                <button id="sprite-next" type="button">Next</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 </body>
