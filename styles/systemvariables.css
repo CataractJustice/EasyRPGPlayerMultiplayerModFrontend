@@ -1,5 +1,24 @@
 :root 
 {
-	--system-background: #303030;
-	--system-border: solid 1px #606060;
+	--system-background-image: none;
+	--system-border-image: none;
+	--system-text-background-image: none;
+}
+
+.rpg-ui-system-window
+{
+	border: 16px solid transparent;
+	border-image: var(--system-border-image);
+	background-image: var(--system-background-image);
+	image-rendering: pixelated;
+}
+.rpg-ui-system-text 
+{
+	background-image: var(--system-text-background-image);
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
+	color: transparent;
+	-webkit-background-clip: text;
+	background-clip: text;
+	image-rendering: pixelated;
 }

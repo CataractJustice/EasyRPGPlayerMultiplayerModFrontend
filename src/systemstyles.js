@@ -44,9 +44,11 @@ async function setSystemImageStyles(system) {
 
 	const background = crop(0, 0, 32, 32);
 	const border = crop(32, 0, 32, 32);
+	const textBackground = crop(0, 48, 16, 16);
 
 	const root = document.documentElement;
 
-    root.style.setProperty('--system-background', `url("${background}")`);
-    root.style.setProperty('--system-border', `url("${border}") 8 round`);
+    root.style.setProperty('--system-background-image', `url("${background}")`);
+    root.style.setProperty('--system-border-image', `url("${border}") 8 repeat`);
+	root.style.setProperty('--system-text-background-image', `url("${textBackground}")`);
 }
