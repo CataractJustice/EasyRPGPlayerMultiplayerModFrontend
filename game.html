@@ -14,6 +14,21 @@
 	<link rel="stylesheet" href="/styles/save-dialog.css">
 	<link rel="stylesheet" href="/styles/sprite-picker.css">
 	<link rel="stylesheet" href="/styles/system.css">
+	<script>
+		// Compatibility shim: the EasyRPG player iframe calls
+		// window.parent.getServerURL() to discover the WebSocket URL.
+		window.getServerURL = function () {
+			const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+			const host = window.location.host;
+			const wsPath = document.documentElement.dataset.wsPath;
+
+			if (wsPath && wsPath !== "/") {
+				return protocol + "//" + host + "/" + wsPath.replace(/^\/+/, "");
+			}
+
+			return protocol + "//" + host;
+		};
+	</script>
 	<script type="module" src="/src/game.js"></script>
 </head>
 <body>
