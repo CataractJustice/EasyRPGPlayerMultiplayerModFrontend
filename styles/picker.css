@@ -13,7 +13,7 @@
 
 .picker-title {
 	margin: 0 0 var(--space-3xl);
-	font-size: var(--font-size-5xl);
+	font-size: 2.5rem;
 	font-weight: 600;
 	text-align: center;
 }
@@ -48,7 +48,7 @@
 
 .picker-list {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 	gap: var(--space-3xl);
 
 	width: 100%;
@@ -58,12 +58,15 @@
 	display: flex;
 	flex-direction: column;
 	gap: var(--space-lg);
+	align-items: center;
+	justify-content: center;
 
 	padding: var(--space-3xl);
 
 	background: var(--color-bg-panel);
 	border: 1px solid var(--color-border-default);
-	border-radius: var(--radius-lg);
+	border-radius: var(--radius-xl);
+	box-shadow: var(--shadow-card);
 
 	color: var(--color-text-primary);
 	text-decoration: none;
@@ -71,13 +74,15 @@
 	transition:
 		background 120ms ease,
 		border-color 120ms ease,
-		transform 120ms ease;
+		transform 0.2s ease,
+		box-shadow 0.2s ease;
 }
 
 .picker-card:hover {
 	background: var(--color-bg-panel-hover);
 	border-color: var(--color-border-accent);
-	transform: translateY(-2px);
+	transform: translateY(-4px);
+	box-shadow: var(--shadow-card-hover);
 }
 
 .picker-card:focus-visible {
@@ -89,6 +94,7 @@
 	margin: 0;
 	font-size: var(--font-size-3xl);
 	font-weight: 600;
+	text-align: center;
 }
 
 .picker-card-count {
@@ -101,6 +107,7 @@
 	font-size: var(--font-size-lg);
 	color: var(--color-text-secondary);
 	line-height: 1.4;
+	text-align: center;
 }
 
 .picker-error {
@@ -127,5 +134,9 @@
 	.picker-summary {
 		flex-direction: column;
 		align-items: center;
+	}
+
+	.picker-title {
+		font-size: 2rem;
 	}
 }

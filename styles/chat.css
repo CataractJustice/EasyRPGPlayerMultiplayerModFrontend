@@ -15,9 +15,10 @@
 	padding: 0;
 
 	background: var(--color-bg-panel);
-	border-left: 1px solid var(--color-border-default);
-	border-top: 1px solid var(--color-border-default);
-	border-bottom: 1px solid var(--color-border-default);
+	border: 1px solid var(--color-border-default);
+	border-radius: var(--radius-xl);
+	overflow: hidden;
+	box-shadow: var(--shadow-card);
 }
 
 /* Chat header */
@@ -125,7 +126,8 @@
 	padding: 0 var(--space-lg);
 
 	background: var(--color-bg-input);
-	border: none;
+	border: 1px solid var(--color-border-default);
+	border-right: none;
 	border-radius: 0;
 	outline: none;
 
@@ -146,8 +148,7 @@
 	padding: 0;
 
 	background: var(--color-bg-button);
-	border: none;
-	border-left: 1px solid var(--color-border-default);
+	border: 1px solid var(--color-border-default);
 	border-radius: 0;
 
 	color: var(--color-text-primary);
@@ -198,7 +199,7 @@
 	margin: 0;
 	padding: var(--space-lg);
 
-	background: #1c1c1c;
+	background: var(--color-bg-body);
 }
 
 .chat-messages[hidden] {
@@ -250,7 +251,7 @@
 	border: none;
 	border-left: 1px solid var(--color-border-default);
 
-	background: #2d4d60;
+	background: var(--color-bg-button);
 	color: var(--color-text-primary);
 
 	font-size: var(--font-size-md);
@@ -259,12 +260,12 @@
 }
 
 .chat-scope-toggle--local {
-	background: #2d4d60;
+	background: var(--color-bg-button);
 	color: var(--color-accent-local);
 }
 
 .chat-scope-toggle--global {
-	background: #5a3d66;
+	background: var(--color-bg-panel-hover);
 	color: var(--color-accent-global);
 }
 
@@ -277,7 +278,7 @@
 }
 
 .chat-scope-toggle:disabled {
-	background: #2a2a2a;
+	background: var(--color-bg-input-disabled);
 	color: var(--color-text-dim);
 	cursor: not-allowed;
 	filter: none;
