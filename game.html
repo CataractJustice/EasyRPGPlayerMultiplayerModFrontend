@@ -8,18 +8,28 @@
 
 	<title>EasyRPG Multiplayer</title>
 
-	<link rel="stylesheet" href="/styles/systemvariables.css">
-	<link rel="stylesheet" href="/styles/style.css">
-	<link rel="stylesheet" href="/styles/savefileforms.css">
-	<link rel="stylesheet" href="/styles/spritepicker.css">
-	<script src="/src/settings.js" defer></script>
-	<script src="/src/multiplayer.js" defer></script>
-	<script src="/src/callbacks.js" defer></script>
-	<script src="/src/savefiles.js" defer></script>
-	<script src="/src/savefileforms.js" defer></script>
-	<script src="/src/loadXYZ.js" defer></script>
-	<script src="/src/systemstyles.js" defer></script>
-	<script src="/src/spriteloader.js" defer></script>
+	<link rel="stylesheet" href="/styles/variables.css">
+	<link rel="stylesheet" href="/styles/base.css">
+	<link rel="stylesheet" href="/styles/chat.css">
+	<link rel="stylesheet" href="/styles/save-dialog.css">
+	<link rel="stylesheet" href="/styles/sprite-picker.css">
+	<link rel="stylesheet" href="/styles/system.css">
+	<script>
+		// Compatibility shim: the EasyRPG player iframe calls
+		// window.parent.getServerURL() to discover the WebSocket URL.
+		window.getServerURL = function () {
+			const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+			const host = window.location.host;
+			const wsPath = document.documentElement.dataset.wsPath;
+
+			if (wsPath && wsPath !== "/") {
+				return protocol + "//" + host + "/" + wsPath.replace(/^\/+/, "");
+			}
+
+			return protocol + "//" + host;
+		};
+	</script>
+	<script type="module" src="/src/game.js"></script>
 </head>
 <body>
 

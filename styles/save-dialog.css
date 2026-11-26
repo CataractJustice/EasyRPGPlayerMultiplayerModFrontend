@@ -1,6 +1,3 @@
-
-/* Save file manager dialog */
-
 .save-dialog {
 	width: min(90%, 420px);
 	max-width: 420px;
@@ -9,20 +6,18 @@
 	margin: auto;
 	padding: 0;
 
-	background: #252525;
-	color: #eeeeee;
+	background: var(--color-bg-panel);
+	color: var(--color-text-primary);
 
-	border: 1px solid #444444;
+	border: 1px solid var(--color-border-default);
 	border-radius: 0;
 
-	box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+	box-shadow: var(--shadow-dialog);
 }
 
 .save-dialog::backdrop {
 	background: rgba(0, 0, 0, 0.7);
 }
-
-/* Dialog content */
 
 .save-dialog__content {
 	display: flex;
@@ -35,8 +30,6 @@
 	padding: 0;
 }
 
-/* Dialog header */
-
 .save-dialog__header {
 	display: flex;
 	align-items: center;
@@ -44,19 +37,17 @@
 	flex-shrink: 0;
 
 	margin: 0;
-	padding: 10px;
+	padding: var(--space-xl);
 
-	background: #303030;
-	border-bottom: 1px solid #444444;
+	background: var(--color-bg-panel-hover);
+	border-bottom: 1px solid var(--color-border-default);
 }
 
 .save-dialog__header h2 {
 	margin: 0;
-	font-size: 16px;
+	font-size: var(--font-size-2xl);
 	font-weight: 600;
 }
-
-/* Close button */
 
 .save-dialog__close {
 	width: 28px;
@@ -69,7 +60,7 @@
 	background: transparent;
 	border: none;
 
-	color: #aaaaaa;
+	color: var(--color-text-muted);
 	font-size: 22px;
 	line-height: 1;
 
@@ -77,47 +68,41 @@
 }
 
 .save-dialog__close:hover {
-	background: #444444;
-	color: #ffffff;
+	background: var(--color-border-default);
+	color: var(--color-text-primary);
 }
 
 .save-dialog__close:active {
-	background: #202020;
+	background: var(--color-bg-input);
 }
-
-/* Save forms */
 
 .save-form {
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: var(--space-xl);
 
 	width: 100%;
 
 	margin: 0;
-	padding: 12px;
+	padding: var(--space-2xl);
 
-	background: #252525;
+	background: var(--color-bg-panel);
 }
 
 .save-form h3 {
-	margin: 0 0 4px;
-	font-size: 14px;
+	margin: 0 0 var(--space-sm);
+	font-size: var(--font-size-xl);
 	font-weight: 600;
-	color: #75c9ff;
+	color: var(--color-text-info);
 }
-
-/* Form labels */
 
 .save-form label {
 	margin: 0;
 
-	color: #cccccc;
-	font-size: 12px;
+	color: var(--color-text-secondary);
+	font-size: var(--font-size-md);
 	font-weight: 600;
 }
-
-/* Form inputs */
 
 .save-form select,
 .save-form input[type="file"] {
@@ -126,95 +111,89 @@
 	height: 36px;
 
 	margin: 0;
-	padding: 0 8px;
+	padding: 0 var(--space-lg);
 
-	background: #202020;
-	border: 1px solid #444444;
+	background: var(--color-bg-input);
+	border: 1px solid var(--color-border-default);
 	border-radius: 0;
 	outline: none;
 
-	color: #eeeeee;
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 13px;
+	color: var(--color-text-primary);
+	font-family: var(--font-family-base);
+	font-size: var(--font-size-lg);
 }
 
 .save-form input[type="file"] {
 	height: auto;
 	min-height: 36px;
-	padding: 6px 8px;
+	padding: var(--space-md) var(--space-lg);
 }
 
 .save-form select:focus,
 .save-form input[type="file"]:focus {
-	border-color: #75c9ff;
+	border-color: var(--color-border-accent);
 }
 
 .save-form select:disabled,
 .save-form input[type="file"]:disabled {
-	background: #2a2a2a;
-	color: #666666;
+	background: var(--color-bg-input-disabled);
+	color: var(--color-text-dim);
 	cursor: not-allowed;
 }
 
 .save-form select option {
-	background: #202020;
-	color: #eeeeee;
+	background: var(--color-bg-input);
+	color: var(--color-text-primary);
 }
 
-/* File input button */
-
 .save-form input[type="file"]::file-selector-button {
-	margin: -2px 8px -2px -4px;
-	padding: 5px 8px;
+	margin: -2px var(--space-lg) -2px calc(-1 * var(--space-lg));
+	padding: 5px var(--space-lg);
 
-	background: #3b6685;
+	background: var(--color-bg-button);
 	border: none;
 
-	color: #ffffff;
-	font-size: 12px;
+	color: var(--color-text-primary);
+	font-size: var(--font-size-md);
 	cursor: pointer;
 }
 
 .save-form input[type="file"]::file-selector-button:hover {
-	background: #497fa5;
+	background: var(--color-bg-button-hover);
 }
-
-/* Submit buttons */
 
 .save-button {
 	width: 100%;
 	height: 36px;
 	flex-shrink: 0;
 
-	margin: 4px 0 0;
-	padding: 0 10px;
+	margin: var(--space-sm) 0 0;
+	padding: 0 var(--space-xl);
 
-	background: #3b6685;
+	background: var(--color-bg-button);
 	border: none;
 	border-radius: 0;
 
-	color: #ffffff;
-	font-size: 13px;
+	color: var(--color-text-primary);
+	font-size: var(--font-size-lg);
 	font-weight: 600;
 
 	cursor: pointer;
 }
 
 .save-button:hover {
-	background: #497fa5;
+	background: var(--color-bg-button-hover);
 }
 
 .save-button:active {
-	background: #294c67;
+	background: var(--color-bg-button-active);
 }
 
 .save-button:disabled {
-	background: #2d4d60;
-	color: #666666;
+	background: var(--color-bg-button-disabled);
+	color: var(--color-text-dim);
 	cursor: not-allowed;
 }
-
-/* Form separator */
 
 .save-dialog hr {
 	width: 100%;
@@ -224,23 +203,21 @@
 	margin: 0;
 	padding: 0;
 
-	background: #444444;
+	background: var(--color-border-default);
 	border: none;
 }
-
-/* Status message */
 
 .save-dialog__status {
 	min-height: 0;
 
 	margin: 0;
-	padding: 8px 12px;
+	padding: var(--space-lg) var(--space-xl);
 
-	background: #202020;
-	border-top: 1px solid #444444;
+	background: var(--color-bg-input);
+	border-top: 1px solid var(--color-border-default);
 
-	color: #75c9ff;
-	font-size: 12px;
+	color: var(--color-text-info);
+	font-size: var(--font-size-md);
 	line-height: 1.4;
 
 	overflow-wrap: anywhere;
@@ -250,20 +227,16 @@
 	display: none;
 }
 
-/* Accessibility */
-
 .save-dialog button:focus-visible,
 .save-dialog input:focus-visible,
 .save-dialog select:focus-visible {
-	outline: 1px solid #75c9ff;
+	outline: 1px solid var(--color-border-accent);
 	outline-offset: 1px;
 }
 
-/* Smaller screens */
-
 @media (max-width: 480px) {
 	.save-dialog {
-		width: calc(100% - 20px);
+		width: calc(100% - var(--space-3xl));
 		max-width: none;
 		max-height: 90vh;
 	}
@@ -273,6 +246,6 @@
 	}
 
 	.save-form {
-		padding: 10px;
+		padding: var(--space-xl);
 	}
 }

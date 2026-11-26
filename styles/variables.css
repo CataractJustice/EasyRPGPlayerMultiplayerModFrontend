@@ -1,0 +1,85 @@
+:root {
+	/* Background */
+	--color-bg-body: #181818;
+	--color-bg-panel: #252525;
+	--color-bg-panel-hover: #303030;
+	--color-bg-input: #202020;
+	--color-bg-input-disabled: #2a2a2a;
+	--color-bg-header: #222222;
+	--color-bg-button: #3b6685;
+	--color-bg-button-hover: #497fa5;
+	--color-bg-button-active: #294c67;
+	--color-bg-button-disabled: #2d4d60;
+
+	/* Borders */
+	--color-border-subtle: #383838;
+	--color-border-default: #444444;
+	--color-border-accent: #75c9ff;
+	--color-border-button: #606060;
+
+	/* Text */
+	--color-text-primary: #eeeeee;
+	--color-text-secondary: #cccccc;
+	--color-text-muted: #aaaaaa;
+	--color-text-dim: #888888;
+	--color-text-danger: #ff7070;
+	--color-text-info: #75c9ff;
+
+	/* Accents */
+	--color-accent-info: #75c9ff;
+	--color-accent-local: #a8d8ff;
+	--color-accent-global: #f0c4ff;
+
+	/* Badges */
+	--color-badge-guest-bg: #3d3520;
+	--color-badge-guest-text: #c8a84b;
+	--color-badge-guest-border: #5a4e2a;
+	--color-badge-auth-bg: #1a3326;
+	--color-badge-auth-text: #4caf82;
+	--color-badge-auth-border: #265c40;
+
+	/* Error / warning surfaces */
+	--color-error-bg: #2d1f1f;
+	--color-error-border: #5a3a3a;
+
+	/* Spacing */
+	--space-xs: 2px;
+	--space-sm: 4px;
+	--space-md: 6px;
+	--space-lg: 8px;
+	--space-xl: 10px;
+	--space-2xl: 12px;
+	--space-3xl: 16px;
+	--space-4xl: 22px;
+	--space-5xl: 24px;
+
+	/* Sizing */
+	--chat-width: 320px;
+	--player-width: 640px;
+	--player-height: 480px;
+	--form-height: 40px;
+	--button-width: 65px;
+
+	/* Typography */
+	--font-family-base: Arial, Helvetica, sans-serif;
+	--font-size-xs: 10px;
+	--font-size-sm: 11px;
+	--font-size-md: 12px;
+	--font-size-lg: 13px;
+	--font-size-xl: 14px;
+	--font-size-2xl: 16px;
+	--font-size-3xl: 18px;
+	--font-size-4xl: 20px;
+	--font-size-5xl: 24px;
+
+	/* Misc */
+	--radius-sm: 3px;
+	--radius-md: 4px;
+	--radius-lg: 6px;
+	--shadow-dialog: 0 8px 30px rgba(0, 0, 0, 0.6);
+
+	/* System theme images, populated by JS */
+	--system-background-image: none;
+	--system-border-image: none;
+	--system-text-background-image: none;
+}

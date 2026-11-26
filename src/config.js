@@ -1,4 +1,17 @@
 /**
+ * Centralized application configuration.
+ *
+ * Override any runtime value by setting the corresponding global
+ * `window.__<NAME>__` before the modules load.
+ */
+
+export const STORAGE_KEY_GUEST_USERNAME = "easyrpg_guest_username";
+
+export const PLAYER_COUNT_REFRESH_MS = 10_000;
+
+export const SPRITES_PER_PAGE = 24;
+
+/**
  * Return the WebSocket URL used by the EasyRPG multiplayer client.
  *
  * Override priority:
@@ -8,8 +21,7 @@
  *
  * @returns {string}
  */
-function getServerURL()
-{
+export function getServerUrl() {
 	if (typeof window !== "undefined" && window.__SERVER_URL__) {
 		return window.__SERVER_URL__;
 	}
@@ -23,10 +35,10 @@ function getServerURL()
 	const wsPath = document.documentElement.dataset.wsPath;
 
 	if (wsPath && wsPath !== "/") {
-		return protocol + "//" + host + "/" + wsPath.replace(/^\/+/, "");
+		return `${protocol}//${host}/${wsPath.replace(/^\/+/, "")}`;
 	}
 
-	return protocol + "//" + host;
+	return `${protocol}//${host}`;
 }
 
 /**
@@ -38,8 +50,7 @@ function getServerURL()
  *
  * @returns {string}
  */
-function getApiBaseURL()
-{
+export function getApiBaseUrl() {
 	if (typeof window !== "undefined" && window.__API_BASE_URL__) {
 		return window.__API_BASE_URL__;
 	}
@@ -48,5 +59,5 @@ function getApiBaseURL()
 		return "http://localhost:4040";
 	}
 
-	return window.location.protocol + "//" + window.location.host;
+	return `${window.location.protocol}//${window.location.host}`;
 }
