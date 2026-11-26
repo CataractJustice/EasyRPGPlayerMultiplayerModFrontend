@@ -1,5 +1,10 @@
-
-async function loadXYZ(url) {
+/**
+ * Decode an RPG Maker 2000/2003 XYZ image into an HTMLCanvasElement.
+ *
+ * @param {string} url
+ * @returns {Promise<HTMLCanvasElement>}
+ */
+export async function loadXYZ(url) {
 	const response = await fetch(url);
 
 	if (!response.ok) {
