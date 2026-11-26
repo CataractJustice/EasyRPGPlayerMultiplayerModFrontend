@@ -43,31 +43,6 @@
 
 		<aside class="chat-container">
 			<div class="chat-header">
-				<div class="options-list">
-					<div class="options-entry" onclick="openSaveFileManager(gameId)">
-					<span>manage savefiles</span>
-					</div>
-					<div class="options-entry" onclick="window.location.href='/'">
-					<span>back to game picker</span>
-					</div>
-					<label class="chat-visibility-label">
-					<div class="options-entry">
-					<input id="show-global-toggle" type="checkbox" checked>
-					<span>global chat</span>
-					</div>
-					</label>
-
-					<label class="ownnametag-visibility-label">
-					<div class="options-entry">
-					<input id="show-ownnametag-toggle" type="checkbox" checked>
-					<span>own nametag</span>
-					</div>
-					</label>
-					<div class="options-entry" onclick="openSpritePicker()">
-						Change sprite
-					</div>
-				</div>
-				</div>
 				<div class="connection-info">
 					<div class="connection-info-entry">
 					<span>Connection:</span>
@@ -156,6 +131,10 @@
 	<footer class="footer">
 		<span>EasyRPG Multiplayer</span>
 		<span>Powered by EasyRPG</span>
+		<div>
+		<button onclick="openSaveFileManager(gameId)">manage savefiles</button>
+		<button onclick="openSpritePicker()">Change sprite</button>
+		</div>
 	</footer>
 
 <dialog
