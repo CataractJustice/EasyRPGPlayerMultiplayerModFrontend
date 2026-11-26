@@ -113,7 +113,7 @@ html.light {
 	--color-bg-header: var(--palette-menu-light);
 	--color-bg-button: var(--palette-gray-300);
 	--color-bg-button-hover: var(--palette-gray-500);
-	--color-bg-button-active: var(--palette-gray-700);
+	--color-bg-button-active: #80afff;
 	--color-bg-button-disabled: #e0e0e0;
 
 	--color-border-subtle: var(--palette-gray-300);
