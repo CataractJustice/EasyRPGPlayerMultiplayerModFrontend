@@ -37,13 +37,15 @@
 
 	<header class="header">
 		<a href="/" class="header-logo">EasyRPG Multiplayer</a>
-		<button class="btn" id="theme-toggle" type="button" aria-pressed="false" aria-label="Switch to light theme">
-			<span class="theme-icon theme-icon--light" aria-hidden="true">☀</span>
-			<span class="theme-icon theme-icon--dark" aria-hidden="true">☾</span>
-		</button>
-		<button class="btn" id="account-menu-toggle" type="button" aria-expanded="false" aria-label="Account menu">
-			<span class="account-icon" aria-hidden="true">👤</span>
-		</button>
+		<div class="header-actions">
+			<button class="btn" id="theme-toggle" type="button" aria-pressed="false" aria-label="Switch to light theme">
+				<span class="theme-icon theme-icon--light" aria-hidden="true">☀</span>
+				<span class="theme-icon theme-icon--dark" aria-hidden="true">☾</span>
+			</button>
+			<button class="btn" id="account-menu-toggle" type="button" aria-expanded="false" aria-label="Account menu">
+				<span class="account-icon" aria-hidden="true">👤</span>
+			</button>
+		</div>
 	</header>
 
 	<nav id="side-menu" aria-label="Main navigation">
@@ -177,7 +179,7 @@
 		<span>EasyRPG Multiplayer</span>
 		<span>Powered by EasyRPG</span>
 		<div>
-		<button onclick="openSaveFileManager(gameId)">manage savefiles</button>
+		<button onclick="openSaveFileManager(gameId)">Manage savefiles</button>
 		<button onclick="openSpritePicker()">Change sprite</button>
 		</div>
 	</footer>
@@ -386,7 +388,7 @@
 		</div>
 		<div class="account-dialog__actions">
 			<a id="account-info-profile-link" class="btn btn--secondary" href="/account">View full profile</a>
-			<button type="button" class="btn" onclick="closeAccountInfoDialog()">Close</button>
+			<button type="button" class="btn btn--secondary" onclick="closeAccountInfoDialog()">Close</button>
 		</div>
 	</div>
 </dialog>
