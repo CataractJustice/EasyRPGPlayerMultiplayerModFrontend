@@ -31,9 +31,6 @@ export class AuthController {
      * @param {HTMLInputElement} elements.chatInput
      * @param {HTMLElement} elements.userInfoName
      * @param {HTMLElement} elements.userInfoBadge
-     * @param {HTMLElement} elements.guestNotice
-     * @param {HTMLButtonElement} elements.guestNoticeCopy
-     * @param {HTMLElement} elements.guestNoticeUuid
      * @param {Function} onChange - Called when the auth state changes.
      */
     constructor(elements, onChange) {
@@ -45,12 +42,6 @@ export class AuthController {
         this.#elements.chatForm.querySelector("button[type='submit']").disabled = true;
 
         this.#elements.usernameForm.addEventListener("submit", (event) => this.#onSubmit(event));
-
-        // The UUID now lives in the chat header. Clicking either the UUID or
-        // the copy control copies it to the clipboard.
-        const copyUuid = () => this.#copyGuestUuid();
-        this.#elements.guestNoticeCopy?.addEventListener("click", copyUuid);
-        this.#elements.guestNoticeUuid?.addEventListener("click", copyUuid);
     }
 
     get username() {
@@ -266,11 +257,9 @@ export class AuthController {
         if (this.#isAuthenticated) {
             this.#elements.userInfoBadge.textContent = "Logged in";
             this.#elements.userInfoBadge.className = "user-info-badge user-info-badge--auth";
-            this.#hideGuestNotice();
         } else {
             this.#elements.userInfoBadge.textContent = "Guest";
             this.#elements.userInfoBadge.className = "user-info-badge user-info-badge--guest";
-            this.#showGuestNotice(data.guestUuid);
         }
 
         this.#saveToStorage(data);
@@ -381,45 +370,6 @@ export class AuthController {
         this.#elements.chatInput.focus();
     }
 
-    #showGuestNotice(guestUuid) {
-        if (!this.#elements.guestNoticeUuid) return;
-
-        this.#elements.guestNoticeUuid.textContent = guestUuid || "";
-        this.#elements.guestNotice?.removeAttribute("hidden");
-        this.#elements.guestNoticeCopy?.removeAttribute("hidden");
-    }
-
-    #hideGuestNotice() {
-        if (this.#elements.guestNoticeUuid) {
-            this.#elements.guestNoticeUuid.textContent = "";
-        }
-        this.#elements.guestNotice?.setAttribute("hidden", "");
-        this.#elements.guestNoticeCopy?.setAttribute("hidden", "");
-    }
-
-    #maskUuid(uuid) {
-        if (!uuid) return "";
-        const parts = uuid.split("-");
-        if (parts.length !== 5) return "****";
-        return `${parts[0]}-****-****-****-${parts[4]}`;
-    }
-
-    #copyGuestUuid() {
-        const fullUuid =
-            this.#guestUuid || this.#elements.guestNoticeUuid?.textContent?.trim();
-        if (!fullUuid || fullUuid === "UUID here") return;
-
-        navigator.clipboard.writeText(fullUuid).then(() => {
-            const copyEl = this.#elements.guestNoticeCopy;
-            if (!copyEl) return;
-            const originalText = copyEl.textContent;
-            copyEl.textContent = "Copied!";
-            setTimeout(() => {
-                copyEl.textContent = originalText;
-            }, 2000);
-        }).catch(() => {});
-    }
-
     #notify(payload) {
         if (typeof this.#onChange === "function") {
             this.#onChange(payload);
@@ -428,10 +378,6 @@ export class AuthController {
 
     setConnection(connected) {
         this.#setConnectionStatus(connected);
-    }
-
-    hideGuestNotice() {
-        this.#hideGuestNotice();
     }
 
     async register(username, password, guestUuid = null) {

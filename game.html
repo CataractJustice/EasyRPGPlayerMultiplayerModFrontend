@@ -100,11 +100,7 @@
 						<span id="user-info-name" class="user-info-name">—</span>
 						<span id="user-info-badge" class="user-info-badge"></span>
 					</div>
-					<div class="connection-info-entry" id="guest-notice-entry" hidden>
-						<div id="guest-notice-uuid" class="guest-notice-uuid">UUID here</div>
-						<div type="button" id="guest-notice-copy" aria-label="Copy guest UUID">copy</div>
-					</div>
-				</div>
+			</div>
 		</div>
 
 			<div
@@ -335,11 +331,14 @@
                 </label>
             </div>
 
-            <div class="sprite-pagination">
-                <button id="sprite-prev" type="button">Previous</button>
-                <span id="sprite-page">Page 1 / 1</span>
-                <button id="sprite-next" type="button">Next</button>
-            </div>
+        <div class="sprite-pagination">
+            <button id="sprite-prev" type="button">Previous</button>
+            <span id="sprite-page">
+                <input type="text" id="sprite-page-input" value="1" maxlength="4">
+                <span id="sprite-page-total"> / 1</span>
+            </span>
+            <button id="sprite-next" type="button">Next</button>
+        </div>
         </div>
     </div>
 </div>
@@ -373,7 +372,12 @@
 			</div>
 			<div class="account-info-row" id="account-info-guest-row" hidden>
 				<span class="account-info-label">Guest UUID:</span>
-				<span id="account-info-guest-uuid" class="account-info-value">—</span>
+				<div class="account-info-guest-field">
+					<span id="account-info-guest-uuid" class="account-info-value account-info-guest-value">—</span>
+					<button type="button" id="account-info-guest-uuid-toggle" class="account-info-guest-toggle" aria-pressed="false" aria-label="Show guest UUID">
+						Show
+					</button>
+				</div>
 			</div>
 			<div class="account-info-row" id="account-info-expires-row" hidden>
 				<span class="account-info-label">Expires:</span>
