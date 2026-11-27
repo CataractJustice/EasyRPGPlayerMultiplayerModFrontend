@@ -6,8 +6,14 @@
  */
 
 export const STORAGE_KEY_GUEST_USERNAME = "easyrpg_guest_username";
+export const STORAGE_KEY_GUEST_UUID = "easyrpg_guest_uuid";
+export const STORAGE_KEY_ACCOUNT_ID = "easyrpg_account_id";
+export const STORAGE_KEY_ACCOUNT_TYPE = "easyrpg_account_type";
+export const STORAGE_KEY_AUTH_TOKEN = "easyrpg_auth_token";
 
 export const PLAYER_COUNT_REFRESH_MS = 10_000;
+
+export const MAP_PLAYER_COUNT_REFRESH_MS = 500;
 
 export const SPRITES_PER_PAGE = 16;
 

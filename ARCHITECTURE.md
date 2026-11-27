@@ -16,6 +16,7 @@ src/
   url.js               # Game detection from URL path or ?game=
   api-games.js         # Fetch /games/games.json
   api-players.js       # Fetch /api/players
+  api-users.js         # Fetch /api/users/<id> (username by account id)
   auth.js              # Auth state and username prompt controller
   chat.js              # Chat UI controller
   multiplayer-api.js   # window.EasyRPGMultiplayer API for the player iframe
@@ -32,6 +33,7 @@ src/
 
 - **config** exposes `getServerUrl`, `getApiBaseUrl`, and constants such as refresh intervals.
 - **api-*** modules own server communication.
+- **api-users** resolves a user's public profile (username) from a 64-bit account id via `GET /api/users/<id>`; surfaced as `EasyRPGMultiplayer.getUsernameById()`.
 - **auth** and **chat** are UI controllers instantiated by `page-game.js`.
 - **multiplayer-api** builds the public API object exposed to the player iframe.
 - **page-game** wires controllers together and forwards chat/name events to the player iframe.

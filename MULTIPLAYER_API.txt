@@ -141,6 +141,37 @@ EasyRPGMultiplayer.getUsername()
     identified themselves (i.e. auth has not resolved yet).
 
 
+EasyRPGMultiplayer.getUsernameById(accountId)
+  Returns  : Promise<{ id: string, username: string|null, accountType: string }>
+  Description:
+    Resolves a user's public profile from their 64-bit account id. This is the
+    id returned by EasyRPGMultiplayer.getAccountId(). The lookup is performed
+    against the backend endpoint GET /api/users/<id>.
+
+    The promise rejects (throws) if the server responds with a non-2xx status,
+    e.g. when no account exists for the given id (404).
+
+  Parameters:
+    accountId — The 64-bit account id as a string (or number). Use the value
+                from getAccountId() to avoid precision loss on large ids.
+
+  Result object:
+    {
+      id          : string,        // The account id, as a decimal string.
+      username    : string | null, // Display name; null for guests without one.
+      accountType : string         // "registered" or "guest".
+    }
+
+  Example:
+    EasyRPGMultiplayer.getUsernameById("122202960792278850")
+      .then(function(user) {
+        console.log(user.username); // "SomePlayer" (or null for a guest)
+      })
+      .catch(function(err) {
+        console.error("Lookup failed:", err);
+      });
+
+
 --------------------------------------------------------------------------------
   EXISTING API  (unchanged)
 --------------------------------------------------------------------------------
@@ -150,7 +181,7 @@ EasyRPGMultiplayer.setConnection(id)
 
 EasyRPGMultiplayer.receiveMessage(data)
   Appends a message to the chat log.
-  Expected shape: { author: string, message: string }
+  Expected shape: { author: string, message: string, mapId: number }
 
 EasyRPGMultiplayer.clearMessages()
   Removes all messages from the chat log.

@@ -15,6 +15,7 @@
 	<link rel="stylesheet" href="/styles/sprite-picker.css">
 	<link rel="stylesheet" href="/styles/system.css">
 	<link rel="stylesheet" href="/styles/toggle-button.css">
+	<link rel="stylesheet" href="/styles/account.css">
 	<script>
 		// Compatibility shim: the EasyRPG player iframe calls
 		// window.parent.getServerURL() to discover the WebSocket URL.
@@ -40,11 +41,22 @@
 			<span class="theme-icon theme-icon--light" aria-hidden="true">☀</span>
 			<span class="theme-icon theme-icon--dark" aria-hidden="true">☾</span>
 		</button>
+		<button class="btn" id="account-menu-toggle" type="button" aria-expanded="false" aria-label="Account menu">
+			<span class="account-icon" aria-hidden="true">👤</span>
+		</button>
 	</header>
 
 	<nav id="side-menu" aria-label="Main navigation">
 		<a href="/">Games</a>
 	</nav>
+
+	<div id="account-menu" class="account-menu" hidden role="menu" aria-label="Account options">
+		<button type="button" class="account-menu-item" id="account-info-btn" role="menuitem">Account Info</button>
+		<button type="button" class="account-menu-item" id="register-btn" role="menuitem">Register Account</button>
+		<button type="button" class="account-menu-item" id="login-btn" role="menuitem">Log In</button>
+		<button type="button" class="account-menu-item" id="load-guest-btn" role="menuitem">Load Guest Account</button>
+		<button type="button" class="account-menu-item account-menu-item--danger" id="logout-btn" role="menuitem">Log Out</button>
+	</div>
 
 	<main class="workspace rgp-window" id="game-main">
 
@@ -68,8 +80,20 @@
 					<span id="connection-status">Not connected</span>
 					</div>
 					<div class="connection-info-entry">
-					<span>Map id:</span>
+					<span>Location:</span>
 					<span id="map-id">none</span>
+					</div>
+					<div class="connection-info-entry connection-info-entry--players">
+					<button
+						type="button"
+						id="player-count-toggle"
+						class="player-count-toggle"
+						aria-pressed="false"
+						title="Showing game players (click to show current map)">
+						Game
+					</button>
+					<span>Players:</span>
+					<span id="player-count">—</span>
 					</div>
 				</div>
 
@@ -77,7 +101,15 @@
 					<span id="user-info-name" class="user-info-name">—</span>
 					<span id="user-info-badge" class="user-info-badge"></span>
 				</div>
+		</div>
+
+		<div id="guest-notice" class="guest-notice" hidden role="region" aria-label="Guest account notice">
+			<button type="button" id="guest-notice-dismiss" class="guest-notice-dismiss" aria-label="Dismiss">×</button>
+			<div class="guest-notice-content">
+				<code id="guest-notice-uuid" class="guest-notice-uuid"></code>
+				<button type="button" id="guest-notice-copy" class="btn guest-notice-copy" aria-label="Copy guest UUID">Copy</button>
 			</div>
+		</div>
 
 			<div
 				id="chat-messages"
@@ -109,6 +141,8 @@
 					</button>
 
 				</form>
+
+				<p class="username-hint">Allowed: A-Z, a-z, 0-9, dash (-) and underscore (_)</p>
 
 				<p id="username-error" class="username-prompt-error" role="alert" aria-live="assertive"></p>
 
@@ -316,3 +350,122 @@
 
 </body>
 </html>
+
+<!-- ACCOUNT INFO DIALOG -->
+<dialog id="account-info-dialog" class="account-dialog" aria-labelledby="account-info-title">
+	<div class="account-dialog__content">
+		<header class="account-dialog__header">
+			<h2 id="account-info-title">Account Information</h2>
+			<button type="button" class="account-dialog__close" aria-label="Close" onclick="closeAccountInfoDialog()">&times;</button>
+		</header>
+		<div class="account-info-grid">
+			<div class="account-info-row">
+				<span class="account-info-label">Account Type:</span>
+				<span id="account-info-type" class="account-info-value">—</span>
+			</div>
+			<div class="account-info-row">
+				<span class="account-info-label">Account ID:</span>
+				<span id="account-info-id" class="account-info-value">—</span>
+			</div>
+			<div class="account-info-row">
+				<span class="account-info-label">Username:</span>
+				<span id="account-info-username" class="account-info-value">—</span>
+			</div>
+			<div class="account-info-row" id="account-info-guest-row" hidden>
+				<span class="account-info-label">Guest UUID:</span>
+				<span id="account-info-guest-uuid" class="account-info-value">—</span>
+			</div>
+			<div class="account-info-row" id="account-info-expires-row" hidden>
+				<span class="account-info-label">Expires:</span>
+				<span id="account-info-expires" class="account-info-value">—</span>
+			</div>
+		</div>
+		<div class="account-dialog__actions">
+			<button type="button" class="btn" onclick="closeAccountInfoDialog()">Close</button>
+		</div>
+	</div>
+</dialog>
+
+<!-- REGISTER DIALOG -->
+<dialog id="register-dialog" class="account-dialog" aria-labelledby="register-title">
+	<div class="account-dialog__content">
+		<header class="account-dialog__header">
+			<h2 id="register-title">Register Account</h2>
+			<button type="button" class="account-dialog__close" aria-label="Close" onclick="closeRegisterDialog()">&times;</button>
+		</header>
+		<p class="register-description">Create a registered account to keep your progress permanently. Optionally paste a guest UUID below to convert that guest account instead of creating a new one.</p>
+		<form id="register-form" class="account-form" novalidate>
+			<div class="form-group">
+				<label for="register-username">Username</label>
+				<input type="text" id="register-username" class="form-input" placeholder="Choose a username" autocomplete="username" maxlength="32" required>
+				<p class="form-hint">Allowed: A-Z, a-z, 0-9, dash (-) and underscore (_)</p>
+			</div>
+			<div class="form-group">
+				<label for="register-password">Password</label>
+				<input type="password" id="register-password" class="form-input" placeholder="Create a password" autocomplete="new-password" minlength="8" required>
+			</div>
+			<div class="form-group">
+				<label for="register-password-confirm">Confirm Password</label>
+				<input type="password" id="register-password-confirm" class="form-input" placeholder="Confirm password" autocomplete="new-password" minlength="8" required>
+			</div>
+			<div class="form-group">
+				<label for="register-guest-uuid">Guest UUID (optional)</label>
+				<input type="text" id="register-guest-uuid" class="form-input" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" autocomplete="off" maxlength="36">
+				<p class="form-hint">Leave empty to create a brand-new account, or paste a guest UUID to convert that guest.</p>
+			</div>
+			<p id="register-error" class="form-error" role="alert" aria-live="assertive"></p>
+			<div class="form-actions">
+				<button type="button" class="btn btn--secondary" onclick="closeRegisterDialog()">Cancel</button>
+				<button type="submit" class="btn btn--primary">Register</button>
+			</div>
+		</form>
+	</div>
+</dialog>
+
+<!-- LOGIN DIALOG -->
+<dialog id="login-dialog" class="account-dialog" aria-labelledby="login-title">
+	<div class="account-dialog__content">
+		<header class="account-dialog__header">
+			<h2 id="login-title">Log In</h2>
+			<button type="button" class="account-dialog__close" aria-label="Close" onclick="closeLoginDialog()">&times;</button>
+		</header>
+		<form id="login-form" class="account-form" novalidate>
+			<div class="form-group">
+				<label for="login-username">Username</label>
+				<input type="text" id="login-username" class="form-input" placeholder="Username" autocomplete="username" required>
+			</div>
+			<div class="form-group">
+				<label for="login-password">Password</label>
+				<input type="password" id="login-password" class="form-input" placeholder="Password" autocomplete="current-password" required>
+			</div>
+			<p id="login-error" class="form-error" role="alert" aria-live="assertive"></p>
+			<div class="form-actions">
+				<button type="button" class="btn btn--secondary" onclick="closeLoginDialog()">Cancel</button>
+				<button type="submit" class="btn btn--primary">Log In</button>
+			</div>
+		</form>
+		<p class="login-guest-link">Don't have an account? <a href="#" id="login-to-load">Load guest account</a> or <a href="#" id="login-to-register">register</a></p>
+	</div>
+</dialog>
+
+<!-- LOAD GUEST DIALOG -->
+<dialog id="load-guest-dialog" class="account-dialog" aria-labelledby="load-guest-title">
+	<div class="account-dialog__content">
+		<header class="account-dialog__header">
+			<h2 id="load-guest-title">Load Guest Account</h2>
+			<button type="button" class="account-dialog__close" aria-label="Close" onclick="closeLoadGuestDialog()">&times;</button>
+		</header>
+		<p class="recover-description">Paste a guest UUID to switch to that guest account. Your guest name is saved on the server, so it will be restored.</p>
+		<form id="load-guest-form" class="account-form" novalidate>
+			<div class="form-group">
+				<label for="load-guest-uuid">Guest UUID</label>
+				<input type="text" id="load-guest-uuid" class="form-input" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" autocomplete="off" maxlength="36" required>
+			</div>
+			<p id="load-guest-error" class="form-error" role="alert" aria-live="assertive"></p>
+			<div class="form-actions">
+				<button type="button" class="btn btn--secondary" onclick="closeLoadGuestDialog()">Cancel</button>
+				<button type="submit" class="btn btn--primary">Load</button>
+			</div>
+		</form>
+	</div>
+</dialog>

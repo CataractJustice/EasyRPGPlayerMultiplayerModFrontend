@@ -3,6 +3,8 @@
  *
  * External callers register callbacks; the chat/auth controllers consume them.
  */
+import { fetchUsernameById } from "./api-users.js";
+
 export function createMultiplayerApi(chat, auth, options = {}) {
 	let sendMessageCallback = options.onSendMessage || (() => {});
 	let authResolvedCallback = options.onAuthResolved || (() => {});
@@ -47,6 +49,26 @@ export function createMultiplayerApi(chat, auth, options = {}) {
 			return auth.isAuthenticated;
 		},
 
+		getAuthToken() {
+			return auth.authToken;
+		},
+
+		getAccountId() {
+			return auth.accountId;
+		},
+
+		getAccountType() {
+			return auth.accountType;
+		},
+
+		getGuestUuid() {
+			return auth.guestUuid;
+		},
+
+		getUsernameById(accountId) {
+			return fetchUsernameById(accountId);
+		},
+
 		setChatScope(global) {
 			chat.setScope(global);
 		},
@@ -78,7 +100,13 @@ export function forwardChatMessage(playerFrame, message, username, isGlobal) {
 
 /**
  * Convenience function to send the user name to the player iframe.
+ *
+ * No-ops until the player iframe has finished loading (its `easyrpgPlayer`
+ * global is only available after the wasm runtime boots) and for empty names.
  */
 export function forwardName(playerFrame, username) {
+	if (typeof username !== "string" || username.length === 0) {
+		return;
+	}
 	playerFrame.contentWindow?.easyrpgPlayer?.sendName?.(username);
 }

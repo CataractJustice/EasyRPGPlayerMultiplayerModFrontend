@@ -18,3 +18,12 @@ export function saveItem(key, value) {
 		return false;
 	}
 }
+
+export function removeItem(key) {
+	try {
+		localStorage.removeItem(key);
+		return true;
+	} catch (_) {
+		return false;
+	}
+}

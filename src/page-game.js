@@ -1,6 +1,7 @@
 import { getGameName } from "./url.js";
 import { AuthController } from "./auth.js";
 import { ChatController } from "./chat.js";
+import { PlayerCountController } from "./player-count.js";
 import { SaveDialogController } from "./save-dialog.js";
 import { SpritePickerController } from "./sprites.js";
 import { setSystemImageStyles } from "./system-theme.js";
@@ -22,6 +23,14 @@ export function initGamePage() {
 
 	const playerFrame = document.getElementById("Player");
 
+	const playerCount = new PlayerCountController({
+		count: document.getElementById("player-count"),
+		toggle: document.getElementById("player-count-toggle")
+	}, {
+		gameId,
+		getMapPlayerCount: () => playerFrame?.contentWindow?.easyrpgPlayer?.getMapPlayerCount?.()
+	});
+
 	const chat = new ChatController({
 		chatMessages: document.getElementById("chat-messages"),
 		chatForm: document.getElementById("chat-form"),
@@ -34,6 +43,13 @@ export function initGamePage() {
 		forwardChatMessage(playerFrame, message, auth.username, isGlobal);
 	});
 
+	let currentUsername = null;
+	const sendNameToPlayer = () => {
+		if (currentUsername) {
+			forwardName(playerFrame, currentUsername);
+		}
+	};
+
 	const auth = new AuthController({
 		usernameForm: document.getElementById("username-form"),
 		usernameInput: document.getElementById("username-input"),
@@ -43,9 +59,14 @@ export function initGamePage() {
 		chatForm: document.getElementById("chat-form"),
 		chatInput: document.getElementById("chat-input"),
 		userInfoName: document.getElementById("user-info-name"),
-		userInfoBadge: document.getElementById("user-info-badge")
+		userInfoBadge: document.getElementById("user-info-badge"),
+		guestNotice: document.getElementById("guest-notice"),
+		guestNoticeCopy: document.getElementById("guest-notice-copy"),
+		guestNoticeUuid: document.getElementById("guest-notice-uuid"),
+		guestNoticeTtl: document.getElementById("guest-notice-ttl")
 	}, (result) => {
-		forwardName(playerFrame, result.username);
+		currentUsername = result.username ?? null;
+		sendNameToPlayer();
 	});
 
 	const saveDialog = new SaveDialogController({
@@ -78,6 +99,10 @@ export function initGamePage() {
 		}
 	});
 
+	// Add account menu and dialog handlers
+	setupAccountMenu(auth);
+	setupAuthDialogs(auth);
+
 	const gameIndexReady = (async () => {
 		try {
 			const response = await fetch(`/games/${encodeURIComponent(gameId)}/index.json`);
@@ -95,9 +120,16 @@ export function initGamePage() {
 
 	if (playerFrame) {
 		playerFrame.src = `/easyrpg-player.html?game=${encodeURIComponent(gameId)}`;
+		// The player iframe only exposes `easyrpgPlayer` after its wasm runtime
+		// boots, which happens after `auth.init()` resolves. Re-send the name
+		// once it is ready so reloads (logged in or guest) keep the nametag.
+		whenPlayerReady(playerFrame, sendNameToPlayer);
 	}
 
 	auth.init();
+	playerCount.start();
+
+	document.getElementById("guest-notice-dismiss")?.addEventListener("click", () => auth.hideGuestNotice());
 
 	// Apply the first available system theme automatically.
 	gameIndexReady.then((index) => {
@@ -106,4 +138,277 @@ export function initGamePage() {
 			setSystemImageStyles(gameId, systemName);
 		}
 	});
+}
+
+function setupAccountMenu(auth) {
+	const menuToggle = document.getElementById("account-menu-toggle");
+	const menu = document.getElementById("account-menu");
+	const accountInfoBtn = document.getElementById("account-info-btn");
+	const registerBtn = document.getElementById("register-btn");
+	const loginBtn = document.getElementById("login-btn");
+	const loadGuestBtn = document.getElementById("load-guest-btn");
+	const logoutBtn = document.getElementById("logout-btn");
+
+	if (!menuToggle || !menu) return;
+
+	menuToggle.addEventListener("click", (e) => {
+		e.stopPropagation();
+		const isOpen = menu.classList.contains("account-menu--open");
+		menu.classList.toggle("account-menu--open", !isOpen);
+		menu.hidden = isOpen;
+		menuToggle.setAttribute("aria-expanded", String(!isOpen));
+		updateAccountMenu(auth);
+	});
+
+	document.addEventListener("click", (e) => {
+		if (!menu.contains(e.target) && e.target !== menuToggle) {
+			menu.classList.remove("account-menu--open");
+			menu.hidden = true;
+			menuToggle.setAttribute("aria-expanded", "false");
+		}
+	});
+
+	// Close the menu when any menu item is activated.
+	menu.addEventListener("click", () => {
+		menu.classList.remove("account-menu--open");
+		menu.hidden = true;
+		menuToggle.setAttribute("aria-expanded", "false");
+	});
+
+	accountInfoBtn?.addEventListener("click", () => openAccountInfoDialog(auth));
+	registerBtn?.addEventListener("click", () => openRegisterDialog(auth));
+	loginBtn?.addEventListener("click", () => openLoginDialog(auth));
+	loadGuestBtn?.addEventListener("click", () => openLoadGuestDialog(auth));
+	logoutBtn?.addEventListener("click", async () => {
+		await auth.logout();
+		reloadPage();
+	});
+}
+
+function updateAccountMenu(auth) {
+	const registerBtn = document.getElementById("register-btn");
+	const loginBtn = document.getElementById("login-btn");
+	const loadGuestBtn = document.getElementById("load-guest-btn");
+	const logoutBtn = document.getElementById("logout-btn");
+
+	if (auth.isAuthenticated) {
+		registerBtn?.setAttribute("hidden", "");
+		loginBtn?.setAttribute("hidden", "");
+		loadGuestBtn?.setAttribute("hidden", "");
+		logoutBtn?.removeAttribute("hidden");
+	} else if (auth.accountType === "guest") {
+		registerBtn?.removeAttribute("hidden");
+		loginBtn?.removeAttribute("hidden");
+		loadGuestBtn?.removeAttribute("hidden");
+		logoutBtn?.removeAttribute("hidden");
+	} else {
+		registerBtn?.setAttribute("hidden", "");
+		loginBtn?.removeAttribute("hidden");
+		loadGuestBtn?.removeAttribute("hidden");
+		logoutBtn?.setAttribute("hidden", "");
+	}
+}
+
+function setupAuthDialogs(auth) {
+	// Register dialog
+	const registerDialog = document.getElementById("register-dialog");
+	const registerForm = document.getElementById("register-form");
+	const registerError = document.getElementById("register-error");
+	
+	window.openRegisterDialog = () => {
+		registerError.textContent = "";
+		registerForm.reset();
+		registerDialog.showModal();
+	};
+	window.closeRegisterDialog = () => registerDialog.close();
+	
+	registerForm?.addEventListener("submit", async (e) => {
+		e.preventDefault();
+		const username = document.getElementById("register-username").value.trim();
+		const password = document.getElementById("register-password").value;
+		const confirm = document.getElementById("register-password-confirm").value;
+		const guestUuid = document.getElementById("register-guest-uuid").value.trim();
+		
+		if (password !== confirm) {
+			registerError.textContent = "Passwords do not match.";
+			return;
+		}
+		if (!/^[A-Za-z0-9_-]+$/.test(username)) {
+			registerError.textContent = "Username may only contain letters, numbers, dashes (-) and underscores (_).";
+			return;
+		}
+		if (password.length < 8) {
+			registerError.textContent = "Password must be at least 8 characters.";
+			return;
+		}
+		
+		const result = await auth.register(username, password, guestUuid || null);
+		if (result.success) {
+			registerDialog.close();
+			reloadPage();
+		} else {
+			registerError.textContent = result.error || "Registration failed.";
+		}
+	});
+
+	// Login dialog
+	const loginDialog = document.getElementById("login-dialog");
+	const loginForm = document.getElementById("login-form");
+	const loginError = document.getElementById("login-error");
+	
+	window.openLoginDialog = () => {
+		loginError.textContent = "";
+		loginForm.reset();
+		loginDialog.showModal();
+	};
+	window.closeLoginDialog = () => loginDialog.close();
+	
+	loginForm?.addEventListener("submit", async (e) => {
+		e.preventDefault();
+		const username = document.getElementById("login-username").value.trim();
+		const password = document.getElementById("login-password").value;
+		
+		const result = await auth.login(username, password);
+		if (result.success) {
+			loginDialog.close();
+			reloadPage();
+		} else {
+			loginError.textContent = result.error || "Login failed.";
+		}
+	});
+
+	document.getElementById("login-to-load")?.addEventListener("click", (e) => {
+		e.preventDefault();
+		loginDialog.close();
+		openLoadGuestDialog(auth);
+	});
+	
+	document.getElementById("login-to-register")?.addEventListener("click", (e) => {
+		e.preventDefault();
+		loginDialog.close();
+		openRegisterDialog(auth);
+	});
+
+	// Load guest dialog
+	const loadGuestDialog = document.getElementById("load-guest-dialog");
+	const loadGuestForm = document.getElementById("load-guest-form");
+	const loadGuestError = document.getElementById("load-guest-error");
+	
+	window.openLoadGuestDialog = () => {
+		loadGuestError.textContent = "";
+		loadGuestForm.reset();
+		loadGuestDialog.showModal();
+	};
+	window.closeLoadGuestDialog = () => loadGuestDialog.close();
+	
+	loadGuestForm?.addEventListener("submit", async (e) => {
+		e.preventDefault();
+		const guestUuid = document.getElementById("load-guest-uuid").value.trim();
+		
+		const result = await auth.loadGuest(guestUuid);
+		if (result.success) {
+			loadGuestDialog.close();
+			reloadPage();
+		} else {
+			loadGuestError.textContent = result.error || "Failed to load guest account.";
+		}
+	});
+
+	// Account info dialog
+	const accountInfoDialog = document.getElementById("account-info-dialog");
+	
+	window.openAccountInfoDialog = () => {
+		updateAccountInfoDialog(auth);
+		accountInfoDialog.showModal();
+	};
+	window.closeAccountInfoDialog = () => accountInfoDialog.close();
+}
+
+function openAccountInfoDialog(auth) {
+	updateAccountInfoDialog(auth);
+	document.getElementById("account-info-dialog").showModal();
+}
+
+function updateAccountInfoDialog(auth) {
+	document.getElementById("account-info-type").textContent = auth.accountType || "—";
+	document.getElementById("account-info-id").textContent = auth.accountId || "—";
+	document.getElementById("account-info-username").textContent = auth.username || "—";
+	
+	const guestRow = document.getElementById("account-info-guest-row");
+	const guestUuidEl = document.getElementById("account-info-guest-uuid");
+	const expiresRow = document.getElementById("account-info-expires-row");
+	const expiresEl = document.getElementById("account-info-expires");
+	
+	if (auth.accountType === "guest" && auth.guestUuid) {
+		guestRow.hidden = false;
+		guestUuidEl.textContent = auth.guestUuid;
+		
+		if (auth.expiresAt) {
+			expiresRow.hidden = false;
+			const date = new Date(auth.expiresAt);
+			expiresEl.textContent = date.toLocaleString();
+		} else {
+			expiresRow.hidden = true;
+		}
+	} else {
+		guestRow.hidden = true;
+		expiresRow.hidden = true;
+	}
+}
+
+function openRegisterDialog(auth) {
+	document.getElementById("register-dialog").showModal();
+}
+
+function openLoginDialog(auth) {
+	document.getElementById("login-dialog").showModal();
+}
+
+function openLoadGuestDialog(auth) {
+	document.getElementById("load-guest-dialog").showModal();
+}
+
+/**
+ * Reload the page after the account identity changes (register, login, load
+ * guest, logout) so the player iframe reconnects with the new credentials.
+ */
+function reloadPage() {
+	window.location.reload();
+}
+
+/**
+ * Invoke `callback` once the player iframe has exposed its `easyrpgPlayer`
+ * runtime. The iframe sets that global asynchronously after the wasm module
+ * boots, so a plain call right after setting `src` would be too early.
+ *
+ * @param {HTMLIFrameElement} playerFrame
+ * @param {() => void} callback
+ */
+function whenPlayerReady(playerFrame, callback) {
+	if (!playerFrame) {
+		return;
+	}
+
+	const isReady = () => {
+		const player = playerFrame.contentWindow?.easyrpgPlayer;
+		return player && typeof player.sendName === "function";
+	};
+
+	if (isReady()) {
+		callback();
+		return;
+	}
+
+	let attempts = 0;
+	const timer = setInterval(() => {
+		if (isReady()) {
+			clearInterval(timer);
+			callback();
+			return;
+		}
+		// Give up after ~60s so a broken iframe cannot poll forever.
+		if (++attempts > 600) {
+			clearInterval(timer);
+		}
+	}, 100);
 }

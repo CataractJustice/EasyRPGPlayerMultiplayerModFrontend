@@ -1,3 +1,5 @@
+import { getMapLocationByGameIdAndMapId } from './map-names.js';
+import { getGameName } from "./url.js";
 /**
  * Chat UI controller.
  *
@@ -9,6 +11,7 @@ export class ChatController {
 	#showGlobal = true;
 	#elements = {};
 	#onSend = null;
+	#mapRequestId = 0;
 
 	/**
 	 * @param {Object} elements - DOM element references.
@@ -45,8 +48,23 @@ export class ChatController {
 		}
 	}
 
-	setMapId(id) {
-		this.#elements.mapIdStatus.textContent = id ?? "none";
+	async setMapId(id) {
+		const status = this.#elements.mapIdStatus;
+		if (!status) {
+			return;
+		}
+
+		const requestId = ++this.#mapRequestId;
+		status.textContent = id ?? "none";
+
+		const location = await getMapLocationByGameIdAndMapId(getGameName(), id);
+
+		// Ignore stale lookups if the player moved to another map meanwhile.
+		if (requestId !== this.#mapRequestId) {
+			return;
+		}
+
+		status.textContent = location?.name ?? (id ?? "none");
 	}
 
 	toggleScope() {
@@ -71,7 +89,7 @@ export class ChatController {
 		return this.#isGlobal;
 	}
 
-	receiveMessage(data) {
+	async receiveMessage(data) {
 		if (!data || typeof data.message !== "string") {
 			return;
 		}
@@ -81,20 +99,56 @@ export class ChatController {
 		messageElement.className = `chat-message ${isGlobal ? "chat-message--global" : "chat-message--local"}`;
 		messageElement.dataset.global = String(isGlobal);
 
+		const metaElement = document.createElement("div");
+		metaElement.className = "message-meta";
+
 		const scopeElement = document.createElement("span");
 		scopeElement.className = "message-scope";
-		scopeElement.textContent = isGlobal ? "[G] " : "[L] ";
+		scopeElement.textContent = isGlobal ? "[G]" : "[L]";
 		scopeElement.title = isGlobal ? "Global" : "Local";
 
 		const authorElement = document.createElement("span");
 		authorElement.className = "message-author";
-		authorElement.textContent = `${data.author || "Unknown"}: `;
+		authorElement.textContent = data.author || "Unknown";
+
+		metaElement.append(scopeElement, authorElement);
+
+		const location = isGlobal
+			? await getMapLocationByGameIdAndMapId(getGameName(), data.mapId)
+			: null;
+
+		if (location?.name) {
+			const mapElement = document.createElement("a");
+			mapElement.className = "message-map";
+			mapElement.textContent = location.name;
+
+			if (location.wiki) {
+				mapElement.href = location.wiki;
+				mapElement.target = "_blank";
+				mapElement.rel = "noopener noreferrer";
+				mapElement.title = `View ${location.name} on the wiki`;
+			}
+
+			metaElement.append(mapElement);
+		}
+
+		const received = new Date();
+		const timeElement = document.createElement("time");
+		timeElement.className = "message-time";
+		timeElement.dateTime = received.toISOString();
+		timeElement.textContent = received.toLocaleTimeString([], {
+			hour: "2-digit",
+			minute: "2-digit"
+		});
+		timeElement.title = received.toLocaleString();
+
+		metaElement.append(timeElement);
 
 		const textElement = document.createElement("span");
 		textElement.className = "message-text";
 		textElement.textContent = data.message;
 
-		messageElement.append(scopeElement, authorElement, textElement);
+		messageElement.append(metaElement, textElement);
 		this.#elements.chatMessages.appendChild(messageElement);
 
 		this.#refreshVisibility();
