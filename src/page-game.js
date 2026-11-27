@@ -6,6 +6,8 @@ import { SaveDialogController } from "./save-dialog.js";
 import { SpritePickerController } from "./sprites.js";
 import { setSystemImageStyles } from "./system-theme.js";
 import { createMultiplayerApi, forwardChatMessage, forwardName } from "./multiplayer-api.js";
+import { getApiBaseUrl } from "./config.js";
+import { formatPlaytime } from "./page-account.js";
 
 /**
  * Entry point for the dedicated game/player page.
@@ -60,7 +62,7 @@ export function initGamePage() {
 		chatInput: document.getElementById("chat-input"),
 		userInfoName: document.getElementById("user-info-name"),
 		userInfoBadge: document.getElementById("user-info-badge"),
-		guestNotice: document.getElementById("guest-notice"),
+		guestNotice: document.getElementById("guest-notice-entry"),
 		guestNoticeCopy: document.getElementById("guest-notice-copy"),
 		guestNoticeUuid: document.getElementById("guest-notice-uuid"),
 		guestNoticeTtl: document.getElementById("guest-notice-ttl")
@@ -128,6 +130,7 @@ export function initGamePage() {
 
 	auth.init();
 	playerCount.start();
+	startPlaytimeTracker(auth, gameId);
 
 	document.getElementById("guest-notice-dismiss")?.addEventListener("click", () => auth.hideGuestNotice());
 
@@ -333,6 +336,15 @@ function updateAccountInfoDialog(auth) {
 	document.getElementById("account-info-type").textContent = auth.accountType || "—";
 	document.getElementById("account-info-id").textContent = auth.accountId || "—";
 	document.getElementById("account-info-username").textContent = auth.username || "—";
+
+	const profileLink = document.getElementById("account-info-profile-link");
+	if (profileLink) {
+		profileLink.href = auth.accountId
+			? `/account/${encodeURIComponent(auth.accountId)}`
+			: "/account";
+	}
+
+	loadAccountPlaytime(auth);
 	
 	const guestRow = document.getElementById("account-info-guest-row");
 	const guestUuidEl = document.getElementById("account-info-guest-uuid");
@@ -353,6 +365,31 @@ function updateAccountInfoDialog(auth) {
 	} else {
 		guestRow.hidden = true;
 		expiresRow.hidden = true;
+	}
+}
+
+async function loadAccountPlaytime(auth) {
+	const el = document.getElementById("account-info-playtime");
+	if (!el) {
+		return;
+	}
+	if (!auth.accountId) {
+		el.textContent = "—";
+		return;
+	}
+
+	try {
+		const response = await fetch(
+			`${getApiBaseUrl()}/api/users/${encodeURIComponent(auth.accountId)}`
+		);
+		if (!response.ok) {
+			el.textContent = "—";
+			return;
+		}
+		const data = await response.json();
+		el.textContent = formatPlaytime(data.playtimeTotal);
+	} catch (_) {
+		el.textContent = "—";
 	}
 }
 
@@ -411,4 +448,64 @@ function whenPlayerReady(playerFrame, callback) {
 			clearInterval(timer);
 		}
 	}, 100);
+}
+
+/**
+ * Accumulate time spent playing and periodically flush it to the server.
+ *
+ * The server stores the total (shown in account info) and a per-game
+ * breakdown (recorded but not displayed yet). Because playtime is keyed by
+ * account id, it is preserved automatically when a guest is converted into a
+ * registered account.
+ */
+function startPlaytimeTracker(auth, gameId) {
+	let pendingSeconds = 0;
+	let lastTick = Date.now();
+
+	const flush = (useBeacon = false) => {
+		const accountId = auth.accountId;
+		const seconds = Math.floor(pendingSeconds);
+		pendingSeconds = 0;
+
+		if (!accountId || seconds <= 0) {
+			return;
+		}
+
+		const body = JSON.stringify({ gameId, seconds });
+		const url = `${getApiBaseUrl()}/api/account/playtime`;
+
+		if (useBeacon && typeof navigator.sendBeacon === "function") {
+			navigator.sendBeacon(url, new Blob([body], { type: "application/json" }));
+		} else {
+			fetch(url, {
+				method: "POST",
+				credentials: "include",
+				headers: { "Content-Type": "application/json" },
+				body
+			}).catch(() => {});
+		}
+	};
+
+	setInterval(() => {
+		const now = Date.now();
+		const delta = (now - lastTick) / 1000;
+		lastTick = now;
+
+		if (document.visibilityState === "visible" && auth.accountId) {
+			pendingSeconds += delta;
+		}
+
+		if (pendingSeconds >= 30) {
+			flush();
+		}
+	}, 5000);
+
+	document.addEventListener("visibilitychange", () => {
+		lastTick = Date.now();
+		if (document.visibilityState === "hidden") {
+			flush(true);
+		}
+	});
+
+	window.addEventListener("pagehide", () => flush(true));
 }

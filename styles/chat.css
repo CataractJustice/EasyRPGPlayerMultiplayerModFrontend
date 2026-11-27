@@ -64,6 +64,10 @@
 	flex-flow: row;
 }
 
+.connection-info-entry[hidden] {
+	display: none;
+}
+
 .player-count-toggle {
 	padding: 0 var(--space-md);
 	height: 20px;

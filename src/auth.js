@@ -45,10 +45,12 @@ export class AuthController {
         this.#elements.chatForm.querySelector("button[type='submit']").disabled = true;
 
         this.#elements.usernameForm.addEventListener("submit", (event) => this.#onSubmit(event));
-        
-        if (this.#elements.guestNoticeCopy) {
-            this.#elements.guestNoticeCopy.addEventListener("click", () => this.#copyGuestUuid());
-        }
+
+        // The UUID now lives in the chat header. Clicking either the UUID or
+        // the copy control copies it to the clipboard.
+        const copyUuid = () => this.#copyGuestUuid();
+        this.#elements.guestNoticeCopy?.addEventListener("click", copyUuid);
+        this.#elements.guestNoticeUuid?.addEventListener("click", copyUuid);
     }
 
     get username() {
@@ -380,17 +382,19 @@ export class AuthController {
     }
 
     #showGuestNotice(guestUuid) {
-        if (!this.#elements.guestNotice || !this.#elements.guestNoticeUuid) return;
-        
-        this.#elements.guestNoticeUuid.textContent = guestUuid;
-        
-        this.#elements.guestNotice.removeAttribute("hidden");
+        if (!this.#elements.guestNoticeUuid) return;
+
+        this.#elements.guestNoticeUuid.textContent = guestUuid || "";
+        this.#elements.guestNotice?.removeAttribute("hidden");
+        this.#elements.guestNoticeCopy?.removeAttribute("hidden");
     }
 
     #hideGuestNotice() {
-        if (this.#elements.guestNotice) {
-            this.#elements.guestNotice.setAttribute("hidden", "");
+        if (this.#elements.guestNoticeUuid) {
+            this.#elements.guestNoticeUuid.textContent = "";
         }
+        this.#elements.guestNotice?.setAttribute("hidden", "");
+        this.#elements.guestNoticeCopy?.setAttribute("hidden", "");
     }
 
     #maskUuid(uuid) {
@@ -401,16 +405,19 @@ export class AuthController {
     }
 
     #copyGuestUuid() {
-        const fullUuid = this.#elements.guestNoticeUuid?.dataset?.fullUuid;
-        if (!fullUuid) return;
-        
+        const fullUuid =
+            this.#guestUuid || this.#elements.guestNoticeUuid?.textContent?.trim();
+        if (!fullUuid || fullUuid === "UUID here") return;
+
         navigator.clipboard.writeText(fullUuid).then(() => {
-            const originalText = this.#elements.guestNoticeCopy.textContent;
-            this.#elements.guestNoticeCopy.textContent = "Copied!";
+            const copyEl = this.#elements.guestNoticeCopy;
+            if (!copyEl) return;
+            const originalText = copyEl.textContent;
+            copyEl.textContent = "Copied!";
             setTimeout(() => {
-                this.#elements.guestNoticeCopy.textContent = originalText;
+                copyEl.textContent = originalText;
             }, 2000);
-        });
+        }).catch(() => {});
     }
 
     #notify(payload) {

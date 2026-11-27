@@ -6,6 +6,7 @@ The frontend is a vanilla-ES-module application served by the backend.
 
 - `src/picker.js` — bootstraps the game selection page (`index.html`).
 - `src/game.js` — bootstraps the dedicated player page (`game.html`).
+- `src/account.js` — bootstraps the standalone account/profile page (`account.html`).
 
 ## Directory structure
 
@@ -27,7 +28,10 @@ src/
   sprites.js           # Animated sprite loader + sprite picker controller
   page-picker.js       # Picker page implementation
   page-game.js         # Game page implementation
+  page-account.js      # Account / public profile page implementation
 ```
+
+Plus `account.html` at the frontend root (served at `/account` and `/account/<id>`).
 
 ## Module responsibilities
 
@@ -36,7 +40,8 @@ src/
 - **api-users** resolves a user's public profile (username) from a 64-bit account id via `GET /api/users/<id>`; surfaced as `EasyRPGMultiplayer.getUsernameById()`.
 - **auth** and **chat** are UI controllers instantiated by `page-game.js`.
 - **multiplayer-api** builds the public API object exposed to the player iframe.
-- **page-game** wires controllers together and forwards chat/name events to the player iframe.
+- **page-game** wires controllers together and forwards chat/name events to the player iframe. It also tracks playtime and flushes it to `POST /api/account/playtime`.
+- **page-account** renders `/account` (own profile, incl. private guest UUID and total playtime) or `/account/<id>` (public profile via `GET /api/users/<id>`, never exposing the guest UUID).
 
 ## Styling
 

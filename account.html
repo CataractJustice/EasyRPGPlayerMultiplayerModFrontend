@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" data-ws-path="/ws">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<meta name="description" content="EasyRPG Multiplayer account info">
+
+	<title>Account – EasyRPG Multiplayer</title>
+
+	<link rel="stylesheet" href="/styles/variables.css">
+	<link rel="stylesheet" href="/styles/base.css">
+	<link rel="stylesheet" href="/styles/account.css">
+	<link rel="stylesheet" href="/styles/profile.css">
+	<script type="module" src="/src/account.js"></script>
+</head>
+<body>
+
+	<header class="header">
+		<a href="/" class="header-logo">EasyRPG Multiplayer</a>
+		<button class="btn" id="theme-toggle" type="button" aria-pressed="false" aria-label="Switch to light theme">
+			<span class="theme-icon theme-icon--light" aria-hidden="true">☀</span>
+			<span class="theme-icon theme-icon--dark" aria-hidden="true">☾</span>
+		</button>
+	</header>
+
+	<nav id="side-menu" aria-label="Main navigation">
+		<a href="/">Games</a>
+	</nav>
+
+	<main class="profile-main">
+		<div class="profile-card">
+			<h1 class="profile-title" id="profile-title">Account</h1>
+			<div class="profile-rows" id="profile-rows"></div>
+			<p id="profile-error" class="form-error" role="alert" aria-live="assertive"></p>
+			<div class="profile-actions">
+				<a href="/" class="btn btn--secondary">Back to games</a>
+			</div>
+		</div>
+	</main>
+
+	<footer class="footer">
+		<span>EasyRPG Multiplayer</span>
+		<span>Powered by EasyRPG</span>
+	</footer>
+
+</body>
+</html>

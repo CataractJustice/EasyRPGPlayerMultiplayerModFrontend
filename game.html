@@ -100,7 +100,7 @@
 						<span id="user-info-name" class="user-info-name">—</span>
 						<span id="user-info-badge" class="user-info-badge"></span>
 					</div>
-					<div class="connection-info-entry">
+					<div class="connection-info-entry" id="guest-notice-entry" hidden>
 						<div id="guest-notice-uuid" class="guest-notice-uuid">UUID here</div>
 						<div type="button" id="guest-notice-copy" aria-label="Copy guest UUID">copy</div>
 					</div>
@@ -367,6 +367,10 @@
 				<span class="account-info-label">Username:</span>
 				<span id="account-info-username" class="account-info-value">—</span>
 			</div>
+			<div class="account-info-row">
+				<span class="account-info-label">Total playtime:</span>
+				<span id="account-info-playtime" class="account-info-value">—</span>
+			</div>
 			<div class="account-info-row" id="account-info-guest-row" hidden>
 				<span class="account-info-label">Guest UUID:</span>
 				<span id="account-info-guest-uuid" class="account-info-value">—</span>
@@ -377,6 +381,7 @@
 			</div>
 		</div>
 		<div class="account-dialog__actions">
+			<a id="account-info-profile-link" class="btn btn--secondary" href="/account">View full profile</a>
 			<button type="button" class="btn" onclick="closeAccountInfoDialog()">Close</button>
 		</div>
 	</div>

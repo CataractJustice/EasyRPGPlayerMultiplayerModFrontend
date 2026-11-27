@@ -1,0 +1,55 @@
+/* Standalone account / public profile page */
+
+.profile-main {
+	display: flex;
+	justify-content: center;
+	padding: var(--space-3xl) var(--space-lg);
+}
+
+.profile-card {
+	width: 100%;
+	max-width: 480px;
+	background: var(--color-bg-panel);
+	border: 1px solid var(--color-border-subtle);
+	border-radius: var(--radius-lg);
+	box-shadow: var(--shadow-dialog);
+	padding: var(--space-3xl);
+}
+
+.profile-title {
+	margin: 0 0 var(--space-2xl);
+	font-size: var(--font-size-2xl);
+	color: var(--color-text-primary);
+	word-break: break-word;
+}
+
+.profile-rows {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-md);
+}
+
+.profile-row {
+	display: flex;
+	justify-content: space-between;
+	gap: var(--space-lg);
+}
+
+.profile-label {
+	color: var(--color-text-secondary);
+	font-size: var(--font-size-sm);
+	flex-shrink: 0;
+}
+
+.profile-value {
+	color: var(--color-text-primary);
+	font-size: var(--font-size-sm);
+	word-break: break-all;
+	text-align: right;
+}
+
+.profile-actions {
+	margin-top: var(--space-2xl);
+	display: flex;
+	gap: var(--space-md);
+}
