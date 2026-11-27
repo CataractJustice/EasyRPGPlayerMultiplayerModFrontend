@@ -186,10 +186,7 @@ html.light .sprite-modal {
     display: flex;
     gap: var(--space-xl);
     padding: var(--space-2xl) var(--space-3xl);
-
     background: var(--color-bg-panel);
-    border-bottom: 1px solid var(--color-border-subtle);
-
     transition: var(--theme-transition);
 }
 
