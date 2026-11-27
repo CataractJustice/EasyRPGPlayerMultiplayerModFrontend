@@ -16,11 +16,11 @@
 }
 
 .save-dialog::backdrop {
-	background: rgba(0, 0, 0, 0.7);
+	background: var(--color-backdrop);
 }
 
 html.light .save-dialog::backdrop {
-	background: rgba(0, 0, 0, 0.45);
+	background: var(--color-backdrop-light);
 }
 
 .save-dialog__content {

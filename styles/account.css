@@ -151,7 +151,11 @@
 }
 
 .account-dialog::backdrop {
-	background: rgba(0, 0, 0, 0.8);
+	background: var(--color-backdrop);
+}
+
+html.light .account-dialog::backdrop {
+	background: var(--color-backdrop-light);
 }
 
 .account-dialog__content {
@@ -268,7 +272,7 @@
 .form-input:focus {
 	outline: none;
 	border-color: var(--color-border-accent);
-	box-shadow: 0 0 0 3px rgba(117, 201, 255, 0.2);
+	box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .form-input::placeholder {
