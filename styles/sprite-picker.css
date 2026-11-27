@@ -136,10 +136,49 @@ html.light .sprite-modal {
 		flex-direction: column;
 		align-items: stretch;
 	}
+}
 
-	.sprite-pagination {
-		justify-content: space-between;
-	}
+.sprite-pagination {
+	display: flex;
+	align-items: center;
+	gap: var(--space-xl);
+	flex-wrap: wrap;
+}
+
+.sprite-page {
+	display: flex;
+	align-items: center;
+	gap: var(--space-xs);
+	font-size: var(--font-size-sm);
+	color: var(--color-text-primary);
+}
+
+#sprite-page-total, #sprite-page-input 
+{
+	padding: var(--space-sm) var(--space-md);
+	font-size: var(--font-size-3xl);
+	font-family: inherit;
+	color: var(--color-text-primary);
+}
+
+#sprite-page-input {
+	width: 44px;
+	appearance: none;
+	background: var(--color-bg-input);
+	border: 1px solid var(--color-border-default);
+	border-radius: var(--radius-md);
+	text-align: center;
+}
+
+#sprite-page-input:focus {
+	border-color: var(--color-border-accent);
+	outline: none;
+	color: var(--color-text-primary);
+	box-shadow: 0 0 0 3px rgba(117, 201, 255, 0.2);
+}
+
+#sprite-page-input::placeholder {
+	color: var(--color-text-dim);
 }
 /* Sprite category navigation */
 

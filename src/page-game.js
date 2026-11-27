@@ -62,10 +62,6 @@ export function initGamePage() {
 		chatInput: document.getElementById("chat-input"),
 		userInfoName: document.getElementById("user-info-name"),
 		userInfoBadge: document.getElementById("user-info-badge"),
-		guestNotice: document.getElementById("guest-notice-entry"),
-		guestNoticeCopy: document.getElementById("guest-notice-copy"),
-		guestNoticeUuid: document.getElementById("guest-notice-uuid"),
-		guestNoticeTtl: document.getElementById("guest-notice-ttl")
 	}, (result) => {
 		currentUsername = result.username ?? null;
 		sendNameToPlayer();
@@ -131,8 +127,6 @@ export function initGamePage() {
 	auth.init();
 	playerCount.start();
 	startPlaytimeTracker(auth, gameId);
-
-	document.getElementById("guest-notice-dismiss")?.addEventListener("click", () => auth.hideGuestNotice());
 
 	// Apply the first available system theme automatically.
 	gameIndexReady.then((index) => {
@@ -348,13 +342,22 @@ function updateAccountInfoDialog(auth) {
 	
 	const guestRow = document.getElementById("account-info-guest-row");
 	const guestUuidEl = document.getElementById("account-info-guest-uuid");
+	const guestToggle = document.getElementById("account-info-guest-uuid-toggle");
 	const expiresRow = document.getElementById("account-info-expires-row");
 	const expiresEl = document.getElementById("account-info-expires");
-	
+
 	if (auth.accountType === "guest" && auth.guestUuid) {
 		guestRow.hidden = false;
-		guestUuidEl.textContent = auth.guestUuid;
-		
+
+		// The guest UUID is treated like a password: keep it masked by default.
+		guestUuidEl.dataset.uuid = auth.guestUuid;
+		guestUuidEl.textContent = maskGuestUuid(auth.guestUuid);
+		guestUuidEl.classList.remove("account-info-guest-value--visible");
+		guestToggle.textContent = "Show";
+		guestToggle.setAttribute("aria-pressed", "false");
+
+		setupGuestUuidField(guestUuidEl, guestToggle);
+
 		if (auth.expiresAt) {
 			expiresRow.hidden = false;
 			const date = new Date(auth.expiresAt);
@@ -366,6 +369,56 @@ function updateAccountInfoDialog(auth) {
 		guestRow.hidden = true;
 		expiresRow.hidden = true;
 	}
+}
+
+/**
+ * Fully mask a guest UUID so no part of it is visible until the user reveals it.
+ */
+function maskGuestUuid(uuid) {
+	if (!uuid) return "—";
+	return "****-****-****-****-****";
+}
+
+/**
+ * Wire up the show/hide toggle and click-to-copy behavior for the guest UUID
+ * field in the account info dialog.
+ */
+function setupGuestUuidField(valueEl, toggleEl) {
+	if (toggleEl.dataset.guestUuidReady === "true") {
+		return;
+	}
+	toggleEl.dataset.guestUuidReady = "true";
+
+	let visible = false;
+
+	toggleEl.addEventListener("click", () => {
+		visible = !visible;
+		const uuid = valueEl.dataset.uuid || "";
+		if (visible) {
+			valueEl.textContent = uuid;
+			valueEl.classList.add("account-info-guest-value--visible");
+			toggleEl.textContent = "Hide";
+			toggleEl.setAttribute("aria-pressed", "true");
+		} else {
+			valueEl.textContent = maskGuestUuid(uuid);
+			valueEl.classList.remove("account-info-guest-value--visible");
+			toggleEl.textContent = "Show";
+			toggleEl.setAttribute("aria-pressed", "false");
+		}
+	});
+
+	valueEl.addEventListener("click", () => {
+		if (!visible) return;
+		const uuid = valueEl.dataset.uuid || "";
+		if (!uuid) return;
+		navigator.clipboard.writeText(uuid).then(() => {
+			const original = toggleEl.textContent;
+			toggleEl.textContent = "Copied!";
+			setTimeout(() => {
+				toggleEl.textContent = visible ? "Hide" : "Show";
+			}, 2000);
+		}).catch(() => {});
+	});
 }
 
 async function loadAccountPlaytime(auth) {

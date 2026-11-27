@@ -220,6 +220,26 @@ export class SpritePickerController {
         this.#elements.close.addEventListener("click", () => this.close());
         this.#elements.remove.addEventListener("click", () => this.#removeSelection());
 
+        const pageInput = this.#elements.page?.querySelector("#sprite-page-input");
+        if (pageInput) {
+            const navigateFromInput = () => {
+                const value = parseInt(pageInput.value, 10) || 1;
+                const max = parseInt(pageInput.getAttribute("max"), 10) || 1;
+                const page = Math.min(Math.max(value, 1), max) - 1;
+                if (page !== this.#pageIndex) {
+                    this.#pageIndex = page;
+                    this.#renderPage();
+                }
+            };
+            pageInput.addEventListener("keydown", (event) => {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    navigateFromInput();
+                }
+            });
+            pageInput.addEventListener("blur", navigateFromInput);
+        }
+
         this.#elements.categoryAll = document.getElementById("sprite-category-all");
 
         this.#elements.categoryFavorites =
@@ -359,13 +379,20 @@ export class SpritePickerController {
             totalPages - 1
         );
 
-        this.#elements.page.textContent =
-            `Page ${this.#pageIndex + 1} / ${totalPages}`;
-
         this.#elements.prev.disabled = this.#pageIndex === 0;
 
         this.#elements.next.disabled =
             this.#pageIndex >= totalPages - 1;
+
+        const pageInput = this.#elements.page?.querySelector("#sprite-page-input");
+        const pageTotal = this.#elements.page?.querySelector("#sprite-page-total");
+        if (pageInput) {
+            pageInput.setAttribute("max", String(totalPages));
+            pageInput.value = String(this.#pageIndex + 1);
+        }
+        if (pageTotal) {
+            pageTotal.textContent = ` / ${totalPages}`;
+        }
     }
     async #renderPage() {
     this.#cleanup();
