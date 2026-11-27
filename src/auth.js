@@ -210,7 +210,7 @@ export class AuthController {
                     success: true,
                     accountId: data.accountId,
                     accountType: data.accountType,
-                    username: data.username || `Guest${data.accountId.slice(-6)}`,
+                    username: data.username || null,
                     guestUuid: data.guestUuid,
                     authToken: data.authToken,
                     expiresAt: data.expiresAt,
