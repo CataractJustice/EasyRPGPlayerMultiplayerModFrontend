@@ -128,7 +128,7 @@ html.light {
 	--color-backdrop-light: rgba(0, 0, 0, 0.25);
 
 	--color-sprite-favorite: #c7a500;
-	--color-sprite-favorite-hover: #a88a00;
+	--color-sprite-favorite-hover: #ffdf40;
 	--color-sprite-placeholder: var(--palette-gray-500);
 
 	--color-focus-ring: rgba(0, 122, 204, 0.2);

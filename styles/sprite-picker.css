@@ -345,11 +345,19 @@ html.light .sprite-categories button.active {
     display: none;
 }
 
-/* Light theme sprite favorite needs a readable star background */
+/* Light theme: favorited star needs an opaque background so the yellow star is readable */
 html.light .sprite-favorite {
-    background: var(--color-backdrop);
+    background: var(--color-bg-input-disabled);
+    color: var(--color-text-muted);
 }
 
 html.light .sprite-favorite.favorited {
-    background: var(--color-backdrop);
+    background: var(--color-bg-input-disabled);
+    color: var(--color-sprite-favorite);
+}
+
+/* Stronger specificity to override the default dark-theme hover color in light mode */
+html.light .sprite-item .sprite-favorite:hover,
+html.light .sprite-item .sprite-favorite.favorited:hover {
+    color: #ffdf40;
 }
